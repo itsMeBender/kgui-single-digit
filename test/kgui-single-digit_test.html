@@ -20,11 +20,133 @@
 
     <script>
       suite('kgui-single-digit', function() {
-        test('A01 - Instantiating the element works', function() {
-          var element = fixture('basic');
+
+        var element;
+        var buttons;
+
+        function eventFire(el, etype){
+          if (el.fireEvent) {
+            el.fireEvent('on' + etype);
+          } else {
+            var evObj = document.createEvent('Events');
+            evObj.initEvent(etype, true, false);
+            el.dispatchEvent(evObj);
+          }
+        }
+
+        // -----------------------------------------------------------------------------------
+        // Test preparation
+        // -----------------------------------------------------------------------------------
+
+        // Will be executed at the beginning of every test().
+        setup(function () {
+            element = fixture("basic");
+            buttons = element.querySelectorAll("paper-icon-button");
+        });
+
+        // -----------------------------------------------------------------------------------
+        // Elementary
+        // -----------------------------------------------------------------------------------
+
+        test('A01 - Instantiating the default element works', function() {
           assert.equal(element.is, 'kgui-single-digit');
         });
+
+        test('A02 - Default DIGIT value', function() {
+          assert.equal(element.digit, 0);
+        });
+
+        test('A03 - Default MIN value', function() {
+          assert.equal(element.min, undefined);
+        });
+
+        test('A04 - Default MAX value', function() {
+          assert.equal(element.max, undefined);
+        });
+
+        // -----------------------------------------------------------------------------------
+        // Functionality
+        // -----------------------------------------------------------------------------------
+
+        if (document.location.href.indexOf("?dom=shadow") === -1) {
+          // Test not possible in SHADOW DOM, because elements are inaccessible.
+          test('B01 - Counting upwards', function() {
+            assert.equal(buttons.length, 2);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 1);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 2);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 3);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 4);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 5);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 6);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 7);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 8);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 9);
+
+            eventFire(buttons[0], "click");
+            assert.equal(element.digit, 0);
+          });
+        } else {
+          console.log("Skipping text B01, due to SHADOW");
+        }
+        
+        if (document.location.href.indexOf("?dom=shadow") === -1) {
+          // Test not possible in SHADOW DOM, because elements are inaccessible.
+          test('B02 - Counting downwards', function() {
+            assert.equal(buttons.length, 2);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 9);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 8);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 7);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 6);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 5);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 4);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 3);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 2);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 1);
+
+            eventFire(buttons[1], "click");
+            assert.equal(element.digit, 0);
+          });
+        } else {
+          console.log("Skipping text B01, due to SHADOW");
+        }
       });
+
     </script>
   </body>
 </html>
