@@ -1,9 +1,10 @@
 {
   "name": "kgui-single-digit",
-  "description": "manipulate a single digit",
+  "description": "Manipulate a single digit",
   "main": "kgui-single-digit.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.9.0"
+    "polymer": "Polymer/polymer#^1.9.0",
+    "paper-icon-button": "PolymerElements/paper-icon-button#^1.0.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

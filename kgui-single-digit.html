@@ -1,4 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
 
 <!--
 `kgui-single-digit` manipulate a single digit
@@ -12,19 +13,69 @@
       :host {
         display: block;
       }
+      .digit--button {
+
+      }
+      .digit--container {
+        width: 3em;
+        background-color: var(--primary-background-color, #DDDDDD);
+      }
+      .digit--number {
+        width: 100%;
+        font-size: 3.4em;
+        text-align: center;
+        color: var(--primary-text-color, #22a2f5);
+      }
+      paper-icon-button {
+        margin: 0 auto;
+        cursor: pointer;
+        width: 100%;
+      }
     </style>
-    <h2>Hello [[prop1]]!</h2>
+    
+    <div class="digit--container">
+      <paper-icon-button class="digit--button" on-tap="increase" icon="add-circle-outline"></paper-icon-button>
+      <div id="digit" class="digit--number">
+        [[digit]]
+      </div>
+      <paper-icon-button class="digit--button" on-tap="decrease" icon="remove-circle-outline"></paper-icon-button>
+    </div>
+
   </template>
 
   <script>
     Polymer({
 
+      // TODO: Add nice animation.
+      
+      // Decrease the digit by one. If less then zero, make 9
+      decrease: function () {
+        if (this.digit === 0) {
+          this.digit = 9;
+          // TODO: fire event to inform passing lower border
+        } else {
+          this.digit -= 1;
+        }
+      //  this.set("digit", this.digit);
+      },
+
+      // Increase the digit by one. If greater then 9, make 0
+      increase: function () {
+        if (this.digit === 9) {
+          this.digit = 0;
+          // TODO: fire event to inform passing upper border
+        } else {
+          this.digit += 1;
+        }
+       // this.set("digit", this.digit);
+      },
+
       is: 'kgui-single-digit',
 
       properties: {
-        prop1: {
-          type: String,
-          value: 'kgui-single-digit',
+        digit: {
+          type: Number,
+          value: 0,
         },
       },
 
