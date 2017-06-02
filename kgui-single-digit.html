@@ -1,0 +1,33 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`kgui-single-digit` manipulate a single digit
+
+@demo demo/index.html
+-->
+
+<dom-module id="kgui-single-digit">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]!</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'kgui-single-digit',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'kgui-single-digit',
+        },
+      },
+
+    });
+  </script>
+</dom-module>
