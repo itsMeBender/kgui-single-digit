@@ -1,0 +1,45 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`kgui-multi-digits` manipulate multiple single digits
+
+@demo demo/index-multi-digits.html
+-->
+
+<dom-module id="kgui-multi-digits">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    
+    <div class="digits--container">
+    </div>
+
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'kgui-multi-digits',
+
+      properties: {
+
+        // Digits formatter
+        format: {
+          type: String,
+          value: "(#,##)#.#",
+        },
+
+        // Digit value
+        number: {
+          type: Number,
+          value: 0,
+        },
+
+      },
+
+    });
+  </script>
+</dom-module>

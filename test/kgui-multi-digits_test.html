@@ -4,25 +4,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>kgui-single-digit min, max test</title>
+    <title>kgui-multi-digits test</title>
 
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <script src="../../web-component-tester/browser.js"></script>
 
-    <link rel="import" href="../kgui-single-digit.html">
+    <link rel="import" href="../kgui-multi-digits.html">
   </head>
   <body>
     <test-fixture id="basic">
       <template>
-        <kgui-single-digit digit="5" min="3" max="7"></kgui-single-digit>
+        <kgui-multi-digits></kgui-multi-digits>
       </template>
     </test-fixture>
 
     <script>
-      suite('kgui-single-digit', function () {
+      suite('kgui-multi-digits', function () {
 
         var element;
-        var buttons;
 
         function eventFire (el, etype) {
           if (el.fireEvent) {
@@ -41,27 +40,22 @@
         // Will be executed at the beginning of every test().
         setup(function () {
             element = fixture("basic");
-            buttons = element.querySelectorAll("paper-icon-button");
         });
 
         // -----------------------------------------------------------------------------------
         // Elementary
         // -----------------------------------------------------------------------------------
 
-        test('A11 - Instantiating the default element works', function() {
-          assert.equal(element.is, 'kgui-single-digit');
+        test('A01 - Instantiating the default element works', function() {
+          assert.equal(element.is, 'kgui-multi-digits');
         });
 
-        test('A12 - Default DIGIT value', function() {
-          assert.equal(element.digit, 5);
+        test('A02 - Default DIGIT value', function() {
+          assert.equal(element.format, "(#,##)#.#");
         });
 
-        test('A13 - Default MIN value', function() {
-          assert.equal(element.min, 3);
-        });
-
-        test('A14 - Default MAX value', function() {
-          assert.equal(element.max, 7);
+        test('A03 - Default MIN value', function() {
+          assert.equal(element.number, 0);
         });
 
         // -----------------------------------------------------------------------------------
@@ -70,38 +64,27 @@
 
         if (document.location.href.indexOf("?dom=shadow") === -1) {
           // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B11 - Counting upwards', function() {
-            assert.equal(buttons.length, 2);
+          test('B01 - Counting upwards', function() {
+            // assert.equal(buttons.length, 2);
 
-            eventFire(buttons[0], "click");
-            assert.equal(element.digit, 6);
+            // eventFire(buttons[0], "click");
+            // assert.equal(element.digit, 1);
 
-            eventFire(buttons[0], "click");
-            assert.equal(element.digit, 7);
-
-            eventFire(buttons[0], "click");
-            assert.equal(element.digit, 7);
           });
         } else {
-          console.log("Skipping text B11, due to SHADOW");
+          console.log("Skipping text B01, due to SHADOW");
         }
         
         if (document.location.href.indexOf("?dom=shadow") === -1) {
           // Test not possible in SHADOW DOM, because elements are inaccessible.
           test('B02 - Counting downwards', function() {
-            assert.equal(buttons.length, 2);
 
-            eventFire(buttons[1], "click");
-            assert.equal(element.digit, 4);
+            // eventFire(buttons[0], "click");
+            // assert.equal(element.digit, 1);
 
-            eventFire(buttons[1], "click");
-            assert.equal(element.digit, 3);
-
-            eventFire(buttons[1], "click");
-            assert.equal(element.digit, 3);
           });
         } else {
-          console.log("Skipping text B12, due to SHADOW");
+          console.log("Skipping text B02, due to SHADOW");
         }
       });
 
