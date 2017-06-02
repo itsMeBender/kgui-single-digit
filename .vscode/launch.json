@@ -5,7 +5,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Demo bleed record",
-            "url": "http://localhost:8081/components/pv-bleeding-form/#pv-bleeding-record",
+            "url": "http://localhost:8081/components/kgui-single-digit/#kgui-single-digit/",
             "webRoot": "${workspaceRoot}"
         },
         {
