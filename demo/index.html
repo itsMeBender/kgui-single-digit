@@ -17,10 +17,24 @@
   </head>
   <body>
     <div class="vertical-section-container centered">
-      <h3>Basic kgui-single-digit demo</h3>
+      <h3>Basic kgui-single-digit loop demo</h3>
+      <ul>
+        <li>Continuous clicking on the '+'-button, will change the digit from '9' to '0'.</li>
+        <li>Continuous clicking on the '-'-button, will change the digit from '0' to '9'.</li>
+      </ul>
       <demo-snippet>
         <template>
           <kgui-single-digit></kgui-single-digit>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <div class="vertical-section-container centered">
+      <h3>Basic kgui-single-digit min, max demo</h3>
+      <p>increase or decrease is limitted by the given range</p>
+      <demo-snippet>
+        <template>
+          <kgui-single-digit digit="4" min="2" max="6"></kgui-single-digit>
         </template>
       </demo-snippet>
     </div>

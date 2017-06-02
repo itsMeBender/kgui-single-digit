@@ -50,33 +50,57 @@
       
       // Decrease the digit by one. If less then zero, make 9
       decrease: function () {
-        if (this.digit === 0) {
-          this.digit = 9;
-          // TODO: fire event to inform passing lower border
+        if (this.min) {
+          if (this.digit > this.min) {
+            this.digit -= 1;
+          }
         } else {
-          this.digit -= 1;
+          if (this.digit === 0) {
+            this.digit = 9;
+            // TODO: fire event to inform passing lower border
+          } else {
+            this.digit -= 1;
+          }
         }
-      //  this.set("digit", this.digit);
       },
 
       // Increase the digit by one. If greater then 9, make 0
       increase: function () {
-        if (this.digit === 9) {
-          this.digit = 0;
-          // TODO: fire event to inform passing upper border
+        if (this.max) {
+          if  (this.digit < this.max) {
+            this.digit += 1;
+          }
         } else {
-          this.digit += 1;
+          if (this.digit === 9) {
+            this.digit = 0;
+            // TODO: fire event to inform passing upper border
+          } else {
+            this.digit += 1;
+          }          
         }
-       // this.set("digit", this.digit);
       },
 
       is: 'kgui-single-digit',
 
       properties: {
+
+        // The value to start with
         digit: {
           type: Number,
           value: 0,
+          notify: true,
         },
+
+        // The maximum value. If none then loop.
+        max: {
+          type: Number,
+        },
+
+        // The minimum value. If none then loop.
+        min: {
+          type: Number,
+        },
+
       },
 
     });
