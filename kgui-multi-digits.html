@@ -1,5 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
-
+<link rel="import" href="kgui-single-digit.html">
 <!--
 `kgui-multi-digits` manipulate multiple single digits
 
@@ -12,15 +12,168 @@
       :host {
         display: block;
       }
+      .digits--container {
+      }
+      .digit__invisible {
+        visibility: hidden;   /* Because we want to reserve the space */
+      }
+      .digit--divider {
+        position: relative;
+        top: -0.6em;
+        display: inline-block;
+        font-size: 4em;
+      }
+      .digit--dot {
+      }
+      kgui-single-digit {
+        margin: 0 -0.2em;        
+      }
     </style>
     
-    <div class="digits--container">
+    <div class="digits--container" id="digits">
     </div>
 
   </template>
 
   <script>
     Polymer({
+
+      // Build the number according to `format` and `number`.
+      buildNumber: function () {
+        /**
+         * The 'format' string is important because, it shows the maximum size of digits.
+         * And which digits are always visible, at least with a '0'.
+         * The '(#...)', part is hidden when the number needs it. The other part is always visible.
+         * The number (float) is centered around the '.'
+         */
+        var digit;
+        var digitCount;
+        var dot;
+        var element = Polymer.dom(this.$.digits);
+        var elementID;
+        var elementLst = [];
+        var i;
+        var numberStr;
+        var node;
+        var optional = false;     // Are digits part of the optional part of the form, as in '(###)'.
+        var textNode;
+        var tokensCount;
+
+        function findFormatFloatPosition () {
+          var j = 0;
+          var max = elementLst.length;
+          for (; j < max; j += 1) {
+            if (!elementLst[j].isdigit) {
+              return j;
+            }
+          }
+          return -1;
+        }
+
+        function findNextDigitPosition (dot) {
+          var j = dot + 1;
+          var max = elementLst.length;
+          for (; j < max; j += 1) {
+            if (elementLst[j].isdigit) {
+              return j;
+            }
+          }
+          return -1;
+        }
+
+        if (this.number) {
+          // console.log("buildNumber()", this.number, element);
+          numberStr = this.number.toString();
+          digitCount = this.format.match(/#/g).length;    // At least 1 or more
+
+          // Remove the old setup, if avaiable
+          while (element.firstChild) {
+              element.removeChild(element.firstChild);
+          }
+
+          // First build the digits sequence, as instructed by the format string.
+          // (##)#,###.## ~ wherby the '(##)' is the optional (hidden) part.
+          tokensCount = this.format.length;
+          for (i = 0; i < tokensCount; i += 1) {
+
+            switch(this.format.substr(i, 1)) {
+
+              case ".":
+                node = document.createElement("DIV");
+                textNode = document.createTextNode(".");
+                node.setAttribute("id", elementID = "token" + i);
+                node.appendChild(textNode);
+                if (optional) {
+                  node.setAttribute("class", "digit__invisible digit--divider digit--dot");
+                } else {
+                  node.setAttribute("class", "digit--divider digit--dot");
+                }
+                element.appendChild(node);
+                break;
+
+              case ",":
+                node = document.createElement("DIV");
+                textNode = document.createTextNode(",");
+                node.setAttribute("id", elementID = "token" + i);
+                node.appendChild(textNode);
+                if (optional) {
+                  node.setAttribute("class", "digit__invisible digit--divider digit--comma");
+                } else {
+                  node.setAttribute("class", "digit--divider digit--comma");
+                }
+                element.appendChild(node);
+                break;
+
+              case "(":
+                optional = true;
+                break;
+
+              case ")":
+                optional = false;
+                break;
+
+              default: // '#' token
+                node = document.createElement("KGUI-SINGLE-DIGIT");
+                digitCount -= 1;  
+                node.setAttribute("id", elementID = "digit" + digitCount);    // 'token2' 'token1' , 'token0'
+                if (optional) {
+                  node.setAttribute("class", "digit__invisible");
+                }
+                element.appendChild(node);
+            } // EndSwitch
+
+            // Build a list to improve interaction FORMAT and NUMBER.
+            // First item in the list is the last number (digit).
+            elementLst.unshift({
+              id: elementID,
+              isdigit: this.format.substr(i, 1) === "#" ? true : false,
+              node: node
+            });
+
+          } // EndFor loop
+console.log(elementLst);
+          
+          // Set the digit number values, starting from float '.' or from the left.
+          if (i = numberStr.indexOf(".") >= 0) {
+            // It is a FLOAT
+          } else {
+            // It is an INTEGER, find first DOT|COMMA
+            dot = findFormatFloatPosition();      // Find '.' in the `format` property
+            dot = (dot >= 0) ? ++dot : 0;         // If not, first DIGIT alway on position 0. Or next to the '.'
+
+            tokensCount = numberStr.length;
+            for (; tokensCount > 0; tokensCount -= 1) {
+              elementLst[dot].node.setAttribute("digit", numberStr.substr(tokensCount - 1, 1));
+              elementLst[dot].node.classList.remove("digit__invisible");
+              // Find next '#' number placeholder.
+              if ((dot = findNextDigitPosition(dot)) < 0) {
+                break;
+              }
+            }
+          }
+
+        }
+      },
 
       is: 'kgui-multi-digits',
 
@@ -30,14 +183,57 @@
         format: {
           type: String,
           value: "(#,##)#.#",
+          observer: "validateFormat",
         },
 
         // Digit value
         number: {
           type: Number,
           value: 0,
+          notify: true,
         },
 
+      },
+
+      ready: function () {
+        console.log("READY");
+        this.buildNumber();
+      },
+
+      // Validate correctness digits `format`.
+      validateFormat: function (_format, old) {
+        var bracketA, bracketB = 0;
+
+        // Writing and testing https://regex101.com/
+        var validation = [
+          {regx: /(?=^(#|\(#))(?=.*#$)/, msg: "Always start with '#' OR '(#' and always end with an '#'."},
+          {regx: /^[#\.,\(\)]+$/, msg: "Allowed characters `.,#()`."},
+          {regx: /^\(.+\)|^#/, msg: "Missing end ')'."},
+        ];
+
+        console.log("validateFormat():", _format);
+        
+        validation.forEach(function(item) {
+          if (!item.regx.test(_format)) {
+            console.log(item.msg);
+            throw item.msg;
+            return false;
+          }
+        }, this);
+
+        // Could not find a REGEXPR solution for single par "(...)"
+        bracketA = _format.match(/\(/g);
+        bracketA = bracketA === null ? 0 : bracketA.length;  //  Accept 0, 1 occurrences
+        bracketB = _format.match(/\)/g);
+        bracketB = bracketB === null ? 0 : bracketB.length;  //  Accept 0, 1 occurrences
+        
+        if (!(bracketA < 2 && bracketA === bracketB) || bracketA > 1) {
+            throw "No matching '()'.";
+            return false;
+        }
+
+        this.buildNumber();
+        return true;
       },
 
     });

@@ -50,42 +50,48 @@
           assert.equal(element.is, 'kgui-multi-digits');
         });
 
-        test('A02 - Default DIGIT value', function() {
+        test('A02 - Default FORMAT `(#,##)#.#`', function() {
           assert.equal(element.format, "(#,##)#.#");
         });
 
-        test('A03 - Default MIN value', function() {
+        test('A03 - Default value 0', function() {
           assert.equal(element.number, 0);
         });
+
+        // -----------------------------------------------------------------------------------
+        // Function validateFormat()
+        // -----------------------------------------------------------------------------------
+
+        // Writing and testing https://regex101.com/
+        test('B01 - validFormat()', function() {
+          // default situation
+          assert.equal(element.format, "(#,##)#.#");
+
+          // Some acceptable formats
+          assert.equal(element.validateFormat("#"), true);                   // Just one digit
+          assert.equal(element.validateFormat("#,#"), true);                 // Two digits diveded by a ','
+          assert.equal(element.validateFormat("#.#"), true);                 // Two digits diveded by a ','
+          assert.equal(element.validateFormat("##.#"), true);                // 00,0
+          assert.equal(element.validateFormat("(#)#.#"), true);              // (0)0,0
+          assert.equal(element.validateFormat("#,###.##"), true);            // (0.0.)0.0
+          assert.equal(element.validateFormat("(#.#).#.#"), true);           // (0.0.)0.0
+
+          // Some un-acceptable formats
+          assert.throws(function () {element.validateFormat("a")}, "Always start with '#' OR '(#' and always end with an '#'.");                // unacceptable characters
+          assert.throws(function () {element.validateFormat("#(#)")}, "Always start with '#' OR '(#' and always end with an '#'.");                // unacceptable characters
+          assert.throws(function () {element.validateFormat("(#a)#")}, "Allowed characters `.,#()`.");                // unacceptable characters
+          assert.throws(function () {element.validateFormat("(#")}, "Missing end ')'.");                // unacceptable characters
+          assert.throws(function () {element.validateFormat("(#))#")}, "No matching '()'.");                // unacceptable characters
+          assert.throws(function () {element.validateFormat("#)#")}, "No matching '()'.");                // unacceptable characters
+          assert.throws(function () {element.validateFormat("(#(#))#")}, "No matching '()'.");                // unacceptable characters
+          assert.throws(function () {element.validateFormat("(#(#)#")}, "No matching '()'.");                // unacceptable characters
+        });
+          
 
         // -----------------------------------------------------------------------------------
         // Functionality
         // -----------------------------------------------------------------------------------
 
-        if (document.location.href.indexOf("?dom=shadow") === -1) {
-          // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B01 - Counting upwards', function() {
-            // assert.equal(buttons.length, 2);
-
-            // eventFire(buttons[0], "click");
-            // assert.equal(element.digit, 1);
-
-          });
-        } else {
-          console.log("Skipping text B01, due to SHADOW");
-        }
-        
-        if (document.location.href.indexOf("?dom=shadow") === -1) {
-          // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B02 - Counting downwards', function() {
-
-            // eventFire(buttons[0], "click");
-            // assert.equal(element.digit, 1);
-
-          });
-        } else {
-          console.log("Skipping text B02, due to SHADOW");
-        }
       });
 
     </script>
