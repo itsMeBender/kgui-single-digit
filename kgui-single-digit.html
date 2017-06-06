@@ -11,7 +11,7 @@
   <template>
     <style>
       :host {
-        display: block;
+        display: inline-block;
       }
       .digit--button {
 
@@ -34,11 +34,11 @@
     </style>
     
     <div class="digit--container">
-      <paper-icon-button class="digit--button" on-tap="increase" icon="add-circle-outline"></paper-icon-button>
+      <paper-icon-button id="btnUp" class="digit--button" on-tap="increase" icon="add-circle-outline"></paper-icon-button>
       <div id="digit" class="digit--number">
         [[digit]]
       </div>
-      <paper-icon-button class="digit--button" on-tap="decrease" icon="remove-circle-outline"></paper-icon-button>
+      <paper-icon-button id="btnDown" class="digit--button" on-tap="decrease" icon="remove-circle-outline"></paper-icon-button>
     </div>
 
   </template>
@@ -53,6 +53,10 @@
         if (this.min) {
           if (this.digit > this.min) {
             this.digit -= 1;
+            this.$.btnUp.disabled = false;
+          } else {
+            // Minimum range reached
+            this.$.btnDown.disabled = true;
           }
         } else {
           if (this.digit === 0) {
@@ -69,6 +73,10 @@
         if (this.max) {
           if  (this.digit < this.max) {
             this.digit += 1;
+            this.$.btnDown.disabled = false;
+          } else {
+            // Maximum range reached
+            this.$.btnUp.disabled = true;
           }
         } else {
           if (this.digit === 9) {
@@ -89,6 +97,7 @@
           type: Number,
           value: 0,
           notify: true,
+          observer: "validateDigit",
         },
 
         // The maximum value. If none then loop.
@@ -101,6 +110,10 @@
           type: Number,
         },
 
+      },
+
+      validateDigit: function (_digit, old) {
+        console.log("validateDigit()");
       },
 
     });
