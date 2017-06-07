@@ -118,26 +118,59 @@
 
       // Validate if `digit` is a number 0..9, returns actual value.
       validateDigit: function (_digit, old) {
+        var retval;
+
         if(!this._onlyNumber(_digit)) {
-          return this.digit = old; // Reset value to default
+          retval = this.digit = old; // Reset value to default
+        } else {
+          retval = _digit;
         }
-        return _digit;
+        if (retval === this.min) {
+            this.$.btnDown.disabled = true;
+        } else {
+            this.$.btnDown.disabled = false;
+        }
+        if (retval === this.max) {
+            this.$.btnUp.disabled = true;
+        } else {
+            this.$.btnUp.disabled = false;
+        }
+        return retval;
       },
 
       // Validate if `max` is a number 0..9, returns actual value.
       validateMax: function (_digit, old) {
+        var retval;
+
         if(!this._onlyNumber(_digit)) {
-          return this.max = old; // Reset value to default
+          retval = this.max = old; // Reset value to default
+        } else {
+          retval = _digit;
         }
-        return _digit;
+        if (retval === this.digit) {
+            this.$.btnUp.disabled = true;
+        } else {
+            this.$.btnUp.disabled = false;
+        }
+        return retval;
       },
 
       // Validate if `min` is a number 0..9, returns actual value.
       validateMin: function (_digit, old) {
+        var retval;
+
         if(!this._onlyNumber(_digit)) {
-          return this.min = old; // Reset value to default
+          retval = this.min = old; // Reset value to default
+        } else {
+          retval = _digit;
         }
-        return _digit;
+        if (retval === this.digit) {
+            this.$.btnDown.disabled = true;
+        } else {
+            this.$.btnDown.disabled = false;
+        }
+
+        return retval;
       },
 
       _onlyNumber: function (_digit) {
