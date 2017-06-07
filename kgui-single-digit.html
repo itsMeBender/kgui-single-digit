@@ -48,7 +48,7 @@
 
       // TODO: Add nice animation.
       
-      // Decrease the digit by one. If less then zero, make 9
+      // Decrease the digit by one. Stops at `min` value given.
       decrease: function () {
         if (this.min) {
           if (this.digit > this.min) {
@@ -68,7 +68,7 @@
         }
       },
 
-      // Increase the digit by one. If greater then 9, make 0
+      // Increase the digit by one.  Stops at `max` value given.
       increase: function () {
         if (this.max) {
           if  (this.digit < this.max) {
@@ -92,36 +92,36 @@
 
       properties: {
 
-        // The value to start with
+        // The value to show by default
         digit: {
           type: Number,
           value: 0,
           notify: true,
-          observer: "validateDigit",
+          observer: "_validateDigit",
         },
 
-        // The maximum value. If none then loop.
+        // The maximum value. If none then loop from 9 to 0.
         max: {
           type: Number,
           notify: true,
-          observer: "validateMax",
+          observer: "_validateMax",
         },
 
-        // The minimum value. If none then loop.
+        // The minimum value. If none then loop from 0 to 9.
         min: {
           type: Number,
           notify: true,
-          observer: "validateMin",
+          observer: "_validateMin",
         },
 
       },
 
       // Validate if `digit` is a number 0..9, returns actual value.
-      validateDigit: function (_digit, old) {
+      _validateDigit: function (_digit, _oldDigit) {
         var retval;
 
-        if(!this._onlyNumber(_digit)) {
-          retval = this.digit = old; // Reset value to default
+        if(!this.onlyNumber(_digit)) {
+          retval = this.digit = _oldDigit; // Reset value to default
         } else {
           retval = _digit;
         }
@@ -139,13 +139,13 @@
       },
 
       // Validate if `max` is a number 0..9, returns actual value.
-      validateMax: function (_digit, old) {
+      _validateMax: function (_max, _oldMax) {
         var retval;
 
-        if(!this._onlyNumber(_digit)) {
-          retval = this.max = old; // Reset value to default
+        if(!this.onlyNumber(_max)) {
+          retval = this.max = _oldMax; // Reset value to default
         } else {
-          retval = _digit;
+          retval = _max;
         }
         if (retval === this.digit) {
             this.$.btnUp.disabled = true;
@@ -156,13 +156,13 @@
       },
 
       // Validate if `min` is a number 0..9, returns actual value.
-      validateMin: function (_digit, old) {
+      _validateMin: function (_min, _oldMin) {
         var retval;
 
-        if(!this._onlyNumber(_digit)) {
-          retval = this.min = old; // Reset value to default
+        if(!this.onlyNumber(_min)) {
+          retval = this.min = _oldMin; // Reset value to default
         } else {
-          retval = _digit;
+          retval = _min;
         }
         if (retval === this.digit) {
             this.$.btnDown.disabled = true;
@@ -173,7 +173,8 @@
         return retval;
       },
 
-      _onlyNumber: function (_digit) {
+      // True if validation of `_digit` is a number 0..9
+      onlyNumber: function (_digit) {
         var validNumbers = /^[0-9]$/;
         if (!validNumbers.test(_digit)) {
           return false;

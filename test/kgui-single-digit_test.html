@@ -152,81 +152,81 @@
         // Functionality, validations.
         // -----------------------------------------------------------------------------------
 
-        test('C01 - validateDigit(), valid digit', function() {
-          assert.equal(element.validateDigit(0, 9), 0);
+        test('C01 - _validateDigit(), valid digit', function() {
+          assert.equal(element._validateDigit(0, 9), 0);
         });
 
-        test('C02 - validateDigit(), invalid  property `digit`, reset to old.', function() {
+        test('C02 - _validateDigit(), invalid  property `digit`, reset to old.', function() {
           var testStr = "#";
 
           // Change default value
           element.digit = 6;
           assert.equal(element.digit, 6);
 
-          assert.equal(element.validateDigit(testStr, 2), 2);   // unacceptable characters
+          assert.equal(element._validateDigit(testStr, 2), 2);   // unacceptable characters
           // After invalid digit, return to previous value. Not 6 but 2 (last validation input)
           assert.equal(element.digit, 2);
         });
 
-        test('C03 - validateDigit(), invalid digit', function() {
+        test('C03 - _validateDigit(), invalid digit', function() {
           var testStr = "1t3";
-          assert.equal(element.validateDigit(testStr, 3), 3);   // unacceptable characters
+          assert.equal(element._validateDigit(testStr, 3), 3);   // unacceptable characters
           assert.equal(element.digit, 3);
 
           testStr = "123"; // It's a number but to long.
-          assert.equal(element.validateDigit(testStr, 4), 4);   // unacceptable characters, too many
+          assert.equal(element._validateDigit(testStr, 4), 4);   // unacceptable characters, too many
           assert.equal(element.digit, 4);
         });
 
-        test('D01 - validateMax(), valid max', function() {
-          assert.equal(element.validateMax("1", 0), 1);
+        test('D01 - _validateMax(), valid max', function() {
+          assert.equal(element._validateMax("1", 0), 1);
         });
 
-        test('D02 - validateMax(), invalid property `max`, reset to old.', function() {
+        test('D02 - _validateMax(), invalid property `max`, reset to old.', function() {
           var testStr = "#";
 
           // Change default value
           element.max = 4;
           assert.equal(element.max, 4);
 
-          assert.equal(element.validateMax(testStr, 3), 3);   // unacceptable characters
+          assert.equal(element._validateMax(testStr, 3), 3);   // unacceptable characters
           // After invalid digit, return to previous value.
           assert.equal(element.max, 3);
         });
 
-        test('D03 - validateMax(), invalid max', function() {
+        test('D03 - _validateMax(), invalid max', function() {
           var testStr = "1t3";
-          assert.equal(element.validateMax(testStr, 5), 5);   // unacceptable characters
+          assert.equal(element._validateMax(testStr, 5), 5);   // unacceptable characters
           assert.equal(element.max, 5);
 
           testStr = "123"; // It's a number but to long.
-          assert.equal(element.validateMax(testStr, 6), 6);   // unacceptable characters
+          assert.equal(element._validateMax(testStr, 6), 6);   // unacceptable characters
           assert.equal(element.max, 6);
         });
 
-        test('E01 - validateMin(), valid min', function() {
-          assert.equal(element.validateMin("9", 0), 9);
+        test('E01 - _validateMin(), valid min', function() {
+          assert.equal(element._validateMin("9", 0), 9);
         });
 
-        test('E02 - validateMin(), invalid property `min`, reset to old.', function() {
+        test('E02 - _validateMin(), invalid property `min`, reset to old.', function() {
           var testStr = "#";
 
           // Change default value
           element.min = 9;
           assert.equal(element.min, 9);
 
-          assert.equal(element.validateMin(testStr, 0), 0);   // unacceptable characters
+          assert.equal(element._validateMin(testStr, 0), 0);   // unacceptable characters
           // After invalid min, return to previous value.
           assert.equal(element.min, 0);
         });
 
-        test('E03 - validateMin(), invalid min', function() {
+        test('E03 - _validateMin(), invalid min', function() {
           var testStr = "1t3";
-          assert.equal(element.validateMin(testStr, 7), 7);   // unacceptable characters
+          assert.equal(element._validateMin(testStr, 7), 7);   // unacceptable characters
           assert.equal(element.min, 7);
 
           testStr = "123"; // It's a number but to long.
-          assert.equal(element.validateMin(testStr, 8), 8);   // unacceptable characters
+          assert.equal(element._validateMin(testStr, 8), 8);   // unacceptable characters
           assert.equal(element.min, 8);
         });
 
