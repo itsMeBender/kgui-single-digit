@@ -118,7 +118,7 @@
       _validateDigit: function (_digit, _oldDigit) {
         var retval;
 
-        if(!this.onlyNumber(_digit)) {
+        if(!this.isNumber(_digit)) {
           retval = this.digit = _oldDigit; // Reset value to default
         } else {
           retval = _digit;
@@ -140,7 +140,7 @@
       _validateMax: function (_max, _oldMax) {
         var retval;
 
-        if(!this.onlyNumber(_max)) {
+        if(!this.isNumber(_max)) {
           retval = this.max = _oldMax; // Reset value to default
         } else {
           retval = _max;
@@ -157,7 +157,7 @@
       _validateMin: function (_min, _oldMin) {
         var retval;
 
-        if(!this.onlyNumber(_min)) {
+        if(!this.isNumber(_min)) {
           retval = this.min = _oldMin; // Reset value to default
         } else {
           retval = _min;
@@ -171,8 +171,8 @@
         return retval;
       },
 
-      // True if validation of `_digit` is a number 0..9
-      onlyNumber: function (_digit) {
+      // True if validation of `_digit` is a number in range of 0..9
+      isNumber: function (_digit) {
         var validNumbers = /^[0-9]$/;
         if (!validNumbers.test(_digit)) {
           return false;
