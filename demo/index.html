@@ -14,13 +14,22 @@
 
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
+    <style>
+      .high {
+        background-color: cyan;
+      }
+      .low {
+        background-color: yellowgreen;
+      }
+    </style>
   </head>
   <body>
-    <div class="vertical-section-container centered">
+    <div class="vertical-section-container centered" id="loop">
       <h3>Basic kgui-single-digit loop demo</h3>
       <ul>
         <li>Continuous clicking on the '+'-button, will change the digit from '9' to '0'.</li>
         <li>Continuous clicking on the '-'-button, will change the digit from '0' to '9'.</li>
+        <li>Crossing the border, background will change color.</li>
       </ul>
       <demo-snippet>
         <template>
@@ -39,4 +48,19 @@
       </demo-snippet>
     </div>
   </body>
+  <script>
+    var loop = document.querySelector("#loop");
+    loop.addEventListener("digit-border-crossed", function (e) {
+      // console.log(e.detail);
+      if (e.detail.n === 9) {
+        // Crossed low, from 0 to 9
+        loop.classList.add("low");
+        loop.classList.remove("high");
+      } else {
+        // Crossed high, from 9 to 0
+        loop.classList.add("high");
+        loop.classList.remove("low");
+      }
+    });
+  </script>
 </html>
