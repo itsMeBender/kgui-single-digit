@@ -1,6 +1,7 @@
 {
   "name": "kgui-single-digit",
-  "description": "Manipulate a single digit",
+  "version": "0.1.0",
+  "description": "Manipulate a single digit or multiple digits",
   "main": "kgui-single-digit.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.9.0",
