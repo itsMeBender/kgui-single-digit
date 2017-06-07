@@ -55,33 +55,31 @@
             this.digit -= 1;
             this.$.btnUp.disabled = false;
           } else {
-            // Minimum range reached
-            this.$.btnDown.disabled = true;
+            this.$.btnDown.disabled = true;            // Minimum range reached
           }
         } else {
           if (this.digit === 0) {
             this.digit = 9;
-            // TODO: fire event to inform passing lower border
+            this.fire('digit-border-crossed', {n: 9, o: 0});
           } else {
             this.digit -= 1;
           }
         }
       },
 
-      // Increase the digit by one.  Stops at `max` value given.
+      // Increase the digit by one. Stops at `max` value given.
       increase: function () {
         if (this.max) {
           if  (this.digit < this.max) {
             this.digit += 1;
             this.$.btnDown.disabled = false;
           } else {
-            // Maximum range reached
-            this.$.btnUp.disabled = true;
+            this.$.btnUp.disabled = true;            // Maximum range reached
           }
         } else {
           if (this.digit === 9) {
             this.digit = 0;
-            // TODO: fire event to inform passing upper border
+            this.fire('digit-border-crossed', {n: 0, o: 9});
           } else {
             this.digit += 1;
           }          
