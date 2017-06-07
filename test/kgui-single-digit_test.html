@@ -14,16 +14,18 @@
   <body>
     <test-fixture id="basic">
       <template>
+        <!-- Using element defaults -->
         <kgui-single-digit></kgui-single-digit>
       </template>
     </test-fixture>
 
     <script>
-      suite('kgui-single-digit', function () {
+      suite('kgui-single-digit', function() {
 
-        var element;
-        var buttons;
+        var element;  // The <kgui-single-digit> - element
+        var buttons;  // There are two buttons; ADD 1, SUBTRACT 1.
 
+        // To fire a CLICK event on those ADD, SUBTRACT buttons.
         function eventFire (el, etype) {
           if (el.fireEvent) {
             el.fireEvent('on' + etype);
@@ -36,9 +38,9 @@
 
         // -----------------------------------------------------------------------------------
         // Test preparation
+        // Will be executed at the beginning of every test().
         // -----------------------------------------------------------------------------------
 
-        // Will be executed at the beginning of every test().
         setup(function () {
             element = fixture("basic");
             buttons = element.querySelectorAll("paper-icon-button");
@@ -65,7 +67,7 @@
         });
 
         // -----------------------------------------------------------------------------------
-        // Functionality
+        // Functionality, BUTTONS
         // -----------------------------------------------------------------------------------
 
         if (document.location.href.indexOf("?dom=shadow") === -1) {
@@ -145,6 +147,89 @@
         } else {
           console.log("Skipping text B02, due to SHADOW");
         }
+
+        // -----------------------------------------------------------------------------------
+        // Functionality, validations.
+        // -----------------------------------------------------------------------------------
+
+        test('C01 - validateDigit(), valid digit', function() {
+          assert.equal(element.validateDigit(0, 9), 0);
+        });
+
+        test('C02 - validateDigit(), invalid  property `digit`, reset to old.', function() {
+          var testStr = "#";
+
+          // Change default value
+          element.digit = 6;
+          assert.equal(element.digit, 6);
+
+          assert.equal(element.validateDigit(testStr, 2), 2);   // unacceptable characters
+          // After invalid digit, return to previous value. Not 6 but 2 (last validation input)
+          assert.equal(element.digit, 2);
+        });
+
+        test('C03 - validateDigit(), invalid digit', function() {
+          var testStr = "1t3";
+          assert.equal(element.validateDigit(testStr, 3), 3);   // unacceptable characters
+          assert.equal(element.digit, 3);
+
+          testStr = "123"; // It's a number but to long.
+          assert.equal(element.validateDigit(testStr, 4), 4);   // unacceptable characters, too many
+          assert.equal(element.digit, 4);
+        });
+
+        test('D01 - validateMax(), valid max', function() {
+          assert.equal(element.validateMax("1", 0), 1);
+        });
+
+        test('D02 - validateMax(), invalid property `max`, reset to old.', function() {
+          var testStr = "#";
+
+          // Change default value
+          element.max = 4;
+          assert.equal(element.max, 4);
+
+          assert.equal(element.validateMax(testStr, 3), 3);   // unacceptable characters
+          // After invalid digit, return to previous value.
+          assert.equal(element.max, 3);
+        });
+
+        test('D03 - validateMax(), invalid max', function() {
+          var testStr = "1t3";
+          assert.equal(element.validateMax(testStr, 5), 5);   // unacceptable characters
+          assert.equal(element.max, 5);
+
+          testStr = "123"; // It's a number but to long.
+          assert.equal(element.validateMax(testStr, 6), 6);   // unacceptable characters
+          assert.equal(element.max, 6);
+        });
+
+        test('E01 - validateMin(), valid min', function() {
+          assert.equal(element.validateMin("9", 0), 9);
+        });
+
+        test('E02 - validateMin(), invalid property `min`, reset to old.', function() {
+          var testStr = "#";
+
+          // Change default value
+          element.min = 9;
+          assert.equal(element.min, 9);
+
+          assert.equal(element.validateMin(testStr, 0), 0);   // unacceptable characters
+          // After invalid min, return to previous value.
+          assert.equal(element.min, 0);
+        });
+
+        test('E03 - validateMin(), invalid min', function() {
+          var testStr = "1t3";
+          assert.equal(element.validateMin(testStr, 7), 7);   // unacceptable characters
+          assert.equal(element.min, 7);
+
+          testStr = "123"; // It's a number but to long.
+          assert.equal(element.validateMin(testStr, 8), 8);   // unacceptable characters
+          assert.equal(element.min, 8);
+        });
+
       });
 
     </script>
