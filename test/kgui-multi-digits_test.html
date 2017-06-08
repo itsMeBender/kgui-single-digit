@@ -63,30 +63,44 @@
         // -----------------------------------------------------------------------------------
 
         // Writing and testing https://regex101.com/
-        test('B01 - validFormat()', function() {
+        test('B01 - validateFormat()', function() {
           // default situation
           assert.equal(element.format, "(#,##)#.#");
 
           // Some acceptable formats
-          assert.equal(element.validateFormat("#"), true);                   // Just one digit
-          assert.equal(element.validateFormat("#,#"), true);                 // Two digits diveded by a ','
-          assert.equal(element.validateFormat("#.#"), true);                 // Two digits diveded by a ','
-          assert.equal(element.validateFormat("##.#"), true);                // 00,0
-          assert.equal(element.validateFormat("(#)#.#"), true);              // (0)0,0
-          assert.equal(element.validateFormat("#,###.##"), true);            // (0.0.)0.0
-          assert.equal(element.validateFormat("(#.#).#.#"), true);           // (0.0.)0.0
+          assert.equal(element.validateFormat("#"), true);                  // Just one digit
+          assert.equal(element.validateFormat("#,#"), true);                // Two digits diveded by a ','
+          assert.equal(element.validateFormat("#.#"), true);                // Two digits diveded by a ','
+          assert.equal(element.validateFormat("##.#"), true);               // 00,0
+          assert.equal(element.validateFormat("(#)#.#"), true);             // (0)0,0
+          assert.equal(element.validateFormat("#,###.##"), true);           // (0.0.)0.0
+          assert.equal(element.validateFormat("(#.#).#.#"), true);          // (0.0.)0.0
 
-          // Some un-acceptable formats
-          assert.throws(function () {element.validateFormat("a")}, "Always start with '#' OR '(#' and always end with an '#'.");                // unacceptable characters
-          assert.throws(function () {element.validateFormat("#(#)")}, "Always start with '#' OR '(#' and always end with an '#'.");                // unacceptable characters
-          assert.throws(function () {element.validateFormat("(#a)#")}, "Allowed characters `.,#()`.");                // unacceptable characters
-          assert.throws(function () {element.validateFormat("(#")}, "Missing end ')'.");                // unacceptable characters
-          assert.throws(function () {element.validateFormat("(#))#")}, "No matching '()'.");                // unacceptable characters
-          assert.throws(function () {element.validateFormat("#)#")}, "No matching '()'.");                // unacceptable characters
-          assert.throws(function () {element.validateFormat("(#(#))#")}, "No matching '()'.");                // unacceptable characters
-          assert.throws(function () {element.validateFormat("(#(#)#")}, "No matching '()'.");                // unacceptable characters
+          // Some unacceptable formats
+          assert.equal(element.validateFormat("a"), false);                 // "Always start with '#' OR '(#' and always end with an '#'
+          assert.equal(element.validateFormat("#(#)"), false);              // "Always start with '#' OR '(#' and always end with an '#'
+          assert.equal(element.validateFormat("(#a)#"), false);             // "Allowed characters `.,#()`
+          assert.equal(element.validateFormat("(#"), false);                // "Missing end ')'
+          assert.equal(element.validateFormat("(#))#"), false);             // "No matching '()'
+          assert.equal(element.validateFormat("#)#"), false);               // "No matching '()'
+          assert.equal(element.validateFormat("(#(#))#"), false);           // "No matching '()'
+          assert.equal(element.validateFormat("(#(#)#"), false);            // "No matching '()'
         });
           
+        test('B02 - validateNumber()', function() {
+          // default situation
+          assert.equal(element.number, 0);
+
+          // Some acceptable numbers
+          assert.equal(element.validateNumber(1), true, "1");                     // Just one digit
+          assert.equal(element.validateNumber('1'), true, "'1'");                 // Just one digit
+          assert.equal(element.validateNumber(99), true, "99");                   // two digits
+          assert.equal(element.validateNumber(0123456789), true, "0123456789");   // A lot digits
+
+          // Some unacceptable numbers
+          assert.equal(element.validateNumber(-1.2), false, "-1.2");              // Negative not supported
+          assert.equal(element.validateNumber("9,9"), false, "9,9");              // COMMA is not a floating point indicator
+        });
 
         // -----------------------------------------------------------------------------------
         // Functionality
