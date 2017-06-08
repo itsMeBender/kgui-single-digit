@@ -245,15 +245,15 @@
             sinon.spy(element, 'fire');
 
             eventFire(buttons[UP], "click");      // Move to digit '0'
-            expect(element.fire).to.have.been.calledWith('digit-border-crossed', {n: 0, o: 9});         
+            expect(element.fire).to.have.been.calledWith('digit-border-crossed', {n: 0, o: 9, id: ""});
           });
 
           test('F02 - Border BOTTOM range "digit-border-crossed" event.', function() {
             element.digit = 0;
             sinon.spy(element, 'fire');
-            
+
             eventFire(buttons[DOWN], "click");      // Move to digit '9'
-            expect(element.fire).to.have.been.calledWith('digit-border-crossed', {n: 9, o: 0});         
+            expect(element.fire).to.have.been.calledWith('digit-border-crossed', {n: 9, o: 0, id: ""});
           });
 
         } else {

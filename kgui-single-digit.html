@@ -60,7 +60,7 @@
         } else {
           if (this.digit === 0) {
             this.digit = 9;
-            this.fire('digit-border-crossed', {n: 9, o: 0});
+            this.fire('digit-border-crossed', {n: 9, o: 0, id: this.id});
           } else {
             this.digit -= 1;
           }
@@ -79,7 +79,7 @@
         } else {
           if (this.digit === 9) {
             this.digit = 0;
-            this.fire('digit-border-crossed', {n: 0, o: 9});
+            this.fire('digit-border-crossed', {n: 0, o: 9, id: this.id});
           } else {
             this.digit += 1;
           }          
@@ -96,19 +96,18 @@
           value: 0,
           notify: true,
           observer: "_validateDigit",
+          reflectToAttribute: true,
         },
 
         // The maximum value. If none then loop from 9 to 0.
         max: {
           type: Number,
-          notify: true,
           observer: "_validateMax",
         },
 
         // The minimum value. If none then loop from 0 to 9.
         min: {
           type: Number,
-          notify: true,
           observer: "_validateMin",
         },
 
