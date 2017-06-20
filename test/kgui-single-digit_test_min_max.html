@@ -51,15 +51,15 @@
         // Elementary
         // -----------------------------------------------------------------------------------
 
-        test('A11 - Instantiating the default element works', function() {
+        test('A11 - Instantiating the default element works', function () {
           assert.equal(element.is, 'kgui-single-digit');
         });
 
-        test('A12 - Default DIGIT value', function() {
+        test('A12 - Default DIGIT value', function () {
           assert.equal(element.getAttribute("digit"), 5);
         });
 
-        test('A13 - Default MIN value', function() {
+        test('A13 - Default MIN value', function () {
           assert.equal(element.getAttribute("min"), 3);
           if (document.location.href.indexOf("?dom=shadow") === -1) {
             assert.equal(buttons[DOWN].disabled, false);
@@ -68,7 +68,7 @@
           }
         });
 
-        test('A14 - Default MAX value', function() {
+        test('A14 - Default MAX value', function () {
           assert.equal(element.getAttribute("max"), 7);
           if (document.location.href.indexOf("?dom=shadow") === -1) {
             assert.equal(buttons[UP].disabled, false);
@@ -84,7 +84,7 @@
 
         if (document.location.href.indexOf("?dom=shadow") === -1) {
           // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B11 - Counting upwards', function() {
+          test('B11 - Counting upwards', function () {
             assert.equal(buttons.length, 2);
 
             assert.equal(buttons[UP].disabled, false);
@@ -108,7 +108,7 @@
         
         if (document.location.href.indexOf("?dom=shadow") === -1) {
           // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B12 - Counting downwards', function() {
+          test('B12 - Counting downwards', function () {
             assert.equal(buttons.length, 2);
 
             assert.equal(buttons[DOWN].disabled, false);
@@ -135,7 +135,7 @@
         // -----------------------------------------------------------------------------------
 
         if (document.location.href.indexOf("?dom=shadow") === -1) {
-          test('C11 - Deactive buttons on MIN or MAX values', function() {
+          test('C11 - Deactive buttons on MIN or MAX values', function () {
             // Prep
             element.setAttribute("max", 9);
             assert.equal(buttons[UP].disabled, false);

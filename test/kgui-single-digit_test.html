@@ -20,7 +20,7 @@
     </test-fixture>
 
     <script>
-      suite('kgui-single-digit', function() {
+      suite('kgui-single-digit', function () {
 
         var buttons;  // There are two buttons; ADD 1, SUBTRACT 1.
         var DOWN = 1;
@@ -52,19 +52,19 @@
         // Elementary
         // -----------------------------------------------------------------------------------
 
-        test('A01 - Instantiating the default element works', function() {
+        test('A01 - Instantiating the default element works', function () {
           assert.equal(element.is, 'kgui-single-digit');
         });
 
-        test('A02 - Default DIGIT value', function() {
+        test('A02 - Default DIGIT value', function () {
           assert.equal(element.digit, 0);
         });
 
-        test('A03 - Default MIN value', function() {
+        test('A03 - Default MIN value', function () {
           assert.equal(element.min, undefined);
         });
 
-        test('A04 - Default MAX value', function() {
+        test('A04 - Default MAX value', function () {
           assert.equal(element.max, undefined);
         });
 
@@ -74,7 +74,7 @@
 
         if (document.location.href.indexOf("?dom=shadow") === -1) {
           // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B01 - Counting upwards', function() {
+          test('B01 - Counting upwards', function () {
             assert.equal(buttons.length, 2);
 
             eventFire(buttons[UP], "click");
@@ -108,12 +108,12 @@
             assert.equal(element.digit, 0);
           });
         } else {
-          console.log("Skipping text B01, due to SHADOW");
+          console.log("Skipping test B01, due to SHADOW");
         }
         
         if (document.location.href.indexOf("?dom=shadow") === -1) {
           // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B02 - Counting downwards', function() {
+          test('B02 - Counting downwards', function () {
             assert.equal(buttons.length, 2);
 
             eventFire(buttons[DOWN], "click");
@@ -147,18 +147,18 @@
             assert.equal(element.digit, 0);
           });
         } else {
-          console.log("Skipping text B02, due to SHADOW");
+          console.log("Skipping test B02, due to SHADOW");
         }
 
         // -----------------------------------------------------------------------------------
         // Functionality, validations.
         // -----------------------------------------------------------------------------------
 
-        test('C01 - _validateDigit(), valid digit', function() {
+        test('C01 - _validateDigit(), valid digit', function () {
           assert.equal(element._validateDigit(0, 9), 0);
         });
 
-        test('C02 - _validateDigit(), invalid  property `digit`, reset to old.', function() {
+        test('C02 - _validateDigit(), invalid  property `digit`, reset to old.', function () {
           var testStr = "#";
 
           // Change default value
@@ -170,7 +170,7 @@
           assert.equal(element.digit, 2);
         });
 
-        test('C03 - _validateDigit(), invalid digit', function() {
+        test('C03 - _validateDigit(), invalid digit', function () {
           var testStr = "1t3";
           assert.equal(element._validateDigit(testStr, 3), 3);   // unacceptable characters
           assert.equal(element.digit, 3);
@@ -180,11 +180,11 @@
           assert.equal(element.digit, 4);
         });
 
-        test('D01 - _validateMax(), valid max', function() {
+        test('D01 - _validateMax(), valid max', function () {
           assert.equal(element._validateMax("1", 0), 1);
         });
 
-        test('D02 - _validateMax(), invalid property `max`, reset to old.', function() {
+        test('D02 - _validateMax(), invalid property `max`, reset to old.', function () {
           var testStr = "#";
 
           // Change default value
@@ -196,7 +196,7 @@
           assert.equal(element.max, 3);
         });
 
-        test('D03 - _validateMax(), invalid max', function() {
+        test('D03 - _validateMax(), invalid max', function () {
           var testStr = "1t3";
           assert.equal(element._validateMax(testStr, 5), 5);   // unacceptable characters
           assert.equal(element.max, 5);
@@ -206,11 +206,11 @@
           assert.equal(element.max, 6);
         });
 
-        test('E01 - _validateMin(), valid min', function() {
+        test('E01 - _validateMin(), valid min', function () {
           assert.equal(element._validateMin("9", 0), 9);
         });
 
-        test('E02 - _validateMin(), invalid property `min`, reset to old.', function() {
+        test('E02 - _validateMin(), invalid property `min`, reset to old.', function () {
           var testStr = "#";
 
           // Change default value
@@ -222,7 +222,7 @@
           assert.equal(element.min, 0);
         });
 
-        test('E03 - _validateMin(), invalid min', function() {
+        test('E03 - _validateMin(), invalid min', function () {
           var testStr = "1t3";
           assert.equal(element._validateMin(testStr, 7), 7);   // unacceptable characters
           assert.equal(element.min, 7);
@@ -240,24 +240,24 @@
 
         if (document.location.href.indexOf("?dom=shadow") === -1) {
           // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('F01 - Border TOP range "digit-border-crossed" event.', function() {
+          test('F01 - Border TOP range "digit-boundary-crossed" event.', function () {
             element.digit = 9;
             sinon.spy(element, 'fire');
 
             eventFire(buttons[UP], "click");      // Move to digit '0'
-            expect(element.fire).to.have.been.calledWith('digit-border-crossed', {n: 0, o: 9, id: ""});
+            expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 0, o: 9, id: ""});
           });
 
-          test('F02 - Border BOTTOM range "digit-border-crossed" event.', function() {
+          test('F02 - Border BOTTOM range "digit-boundary-crossed" event.', function () {
             element.digit = 0;
             sinon.spy(element, 'fire');
 
             eventFire(buttons[DOWN], "click");      // Move to digit '9'
-            expect(element.fire).to.have.been.calledWith('digit-border-crossed', {n: 9, o: 0, id: ""});
+            expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 9, o: 0, id: ""});
           });
 
         } else {
-          console.log("Skipping text F01, due to SHADOW");
+          console.log("Skipping test F01, due to SHADOW");
         }
 
       });

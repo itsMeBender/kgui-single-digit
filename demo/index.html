@@ -51,7 +51,7 @@
   </body>
   <script>
     var loop = document.querySelector("#loop");
-    loop.addEventListener("digit-border-crossed", function (e) {
+    loop.addEventListener("digit-boundary-crossed", function (e) {
       // console.log(e.detail);
       if (e.detail.n === 9) {
         // Crossed low, from 0 to 9
