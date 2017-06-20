@@ -5,6 +5,8 @@
   "main": "kgui-single-digit.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.9.0",
+    "iron-icon": "PolymerElements/iron-icon#^1.0.0",
+    "iron-iconset-svg": "PolymerElements/iron-iconset-svg#^2.0.0",
     "paper-icon-button": "PolymerElements/paper-icon-button#^1.0.0"
   },
   "devDependencies": {
@@ -12,5 +14,8 @@
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
     "web-component-tester": "Polymer/web-component-tester#^6.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  },
+  "resolutions": {
+    "iron-iconset-svg": "^1.0.0"
   }
 }
