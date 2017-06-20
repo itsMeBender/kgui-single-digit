@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="kgui-single-digit-icons.html">
 
 <!--
 `kgui-single-digit` manipulate a single digit
@@ -12,9 +13,6 @@
     <style>
       :host {
         display: inline-block;
-      }
-      .digit--button {
-
       }
       .digit--container {
         width: 3em;
@@ -34,11 +32,11 @@
     </style>
     
     <div class="digit--container">
-      <paper-icon-button id="btnUp" class="digit--button" on-tap="increase" icon="add-circle-outline"></paper-icon-button>
+      <paper-icon-button id="btnUp" class="digit--button" on-tap="increase" icon="kgui-single-digit-icons:add-circle-outline"></paper-icon-button>
       <div id="digit" class="digit--number">
         [[digit]]
       </div>
-      <paper-icon-button id="btnDown" class="digit--button" on-tap="decrease" icon="remove-circle-outline"></paper-icon-button>
+      <paper-icon-button id="btnDown" class="digit--button" on-tap="decrease" icon="kgui-single-digit-icons:remove-circle-outline"></paper-icon-button>
     </div>
 
   </template>
@@ -50,39 +48,45 @@
       
       // Decrease the digit by one. Stops at `min` value given.
       decrease: function () {
+        var o = this.digit;
         if (this.min) {
           if (this.digit > this.min) {
             this.digit -= 1;
             this.$.btnUp.disabled = false;
+            this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: -1});
           } else {
             this.$.btnDown.disabled = true;            // Minimum range reached
           }
         } else {
           if (this.digit === 0) {
             this.digit = 9;
-            this.fire('digit-border-crossed', {n: 9, o: 0, id: this.id});
+            // this.fire('digit-boundary-crossed', {n: 9, o: 0, id: this.id});
           } else {
             this.digit -= 1;
           }
+          this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: -1});
         }
       },
 
       // Increase the digit by one. Stops at `max` value given.
       increase: function () {
+        var o = this.digit;
         if (this.max) {
           if  (this.digit < this.max) {
             this.digit += 1;
             this.$.btnDown.disabled = false;
+      	    this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: 1});
           } else {
             this.$.btnUp.disabled = true;            // Maximum range reached
           }
         } else {
           if (this.digit === 9) {
             this.digit = 0;
-            this.fire('digit-border-crossed', {n: 0, o: 9, id: this.id});
+            // this.fire('digit-boundary-crossed', {n: 0, o: 9, id: this.id});
           } else {
             this.digit += 1;
           }          
+          this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: 1});
         }
       },
 
