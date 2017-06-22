@@ -8,7 +8,11 @@
   ],
   "rules": {
     "no-var": "off",
-    "new-cap": ["error", { "capIsNewExceptions": ["Polymer"] }]
+    "new-cap": ["error", { "capIsNewExceptions": ["Polymer"] }],
+    "max-len": [1, 140, 2, {
+      "ignorePattern": "^import\\s.+\\sfrom\\s.+;$",
+      "ignoreUrls": true
+    }]
   },
   "globals": {
     "Polymer": true

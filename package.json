@@ -1,0 +1,30 @@
+{
+  "name": "kgui-single-digit",
+  "version": "1.0.0",
+  "description": "Manipulate one single digit.",
+  "main": "index.html",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "eslint": "^4.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.0.0",
+    "eslint-config-google": "^0.8.0",
+    "eslint-plugin-html": "^3.0.0"
+  },
+  "scripts": {
+    "test": "test/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itsMeBender/kgui-single-digit.git"
+  },
+  "author": "Pieter",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/itsMeBender/kgui-single-digit/issues"
+  },
+  "homepage": "https://github.com/itsMeBender/kgui-single-digit#readme"
+}

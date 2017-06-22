@@ -45,9 +45,9 @@
     Polymer({
 
       // TODO: Add nice animation.
-      
+
       // Decrease the digit by one. Stops at `min` value given.
-      decrease: function () {
+      decrease: function() {
         var o = this.digit;
         if (this.min) {
           if (this.digit > this.min) {
@@ -55,7 +55,7 @@
             this.$.btnUp.disabled = false;
             this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: -1});
           } else {
-            this.$.btnDown.disabled = true;            // Minimum range reached
+            this.$.btnDown.disabled = true; // Minimum range reached
           }
         } else {
           if (this.digit === 0) {
@@ -69,15 +69,15 @@
       },
 
       // Increase the digit by one. Stops at `max` value given.
-      increase: function () {
+      increase: function() {
         var o = this.digit;
         if (this.max) {
-          if  (this.digit < this.max) {
+          if (this.digit < this.max) {
             this.digit += 1;
             this.$.btnDown.disabled = false;
-      	    this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: 1});
+            this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: 1});
           } else {
-            this.$.btnUp.disabled = true;            // Maximum range reached
+            this.$.btnUp.disabled = true; // Maximum range reached
           }
         } else {
           if (this.digit === 9) {
@@ -85,7 +85,7 @@
             // this.fire('digit-boundary-crossed', {n: 0, o: 9, id: this.id});
           } else {
             this.digit += 1;
-          }          
+          }
           this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: 1});
         }
       },
@@ -99,29 +99,29 @@
           type: Number,
           value: 0,
           notify: true,
-          observer: "_validateDigit",
+          observer: '_validateDigit',
           reflectToAttribute: true,
         },
 
         // The maximum value. If none then loop from 9 to 0.
         max: {
           type: Number,
-          observer: "_validateMax",
+          observer: '_validateMax',
         },
 
         // The minimum value. If none then loop from 0 to 9.
         min: {
           type: Number,
-          observer: "_validateMin",
+          observer: '_validateMin',
         },
 
       },
 
       // Validate if `digit` is a number 0..9, returns actual value.
-      _validateDigit: function (_digit, _oldDigit) {
+      _validateDigit: function(_digit, _oldDigit) {
         var retval;
 
-        if(!this.isNumber(_digit)) {
+        if (!this.isNumber(_digit)) {
           retval = this.digit = _oldDigit; // Reset value to default
         } else {
           retval = _digit;
@@ -140,10 +140,10 @@
       },
 
       // Validate if `max` is a number 0..9, returns actual value.
-      _validateMax: function (_max, _oldMax) {
+      _validateMax: function(_max, _oldMax) {
         var retval;
 
-        if(!this.isNumber(_max)) {
+        if (!this.isNumber(_max)) {
           retval = this.max = _oldMax; // Reset value to default
         } else {
           retval = _max;
@@ -157,10 +157,10 @@
       },
 
       // Validate if `min` is a number 0..9, returns actual value.
-      _validateMin: function (_min, _oldMin) {
+      _validateMin: function(_min, _oldMin) {
         var retval;
 
-        if(!this.isNumber(_min)) {
+        if (!this.isNumber(_min)) {
           retval = this.min = _oldMin; // Reset value to default
         } else {
           retval = _min;
@@ -175,7 +175,7 @@
       },
 
       // True if validation of `_digit` is a number in range of 0..9
-      isNumber: function (_digit) {
+      isNumber: function(_digit) {
         var validNumbers = /^[0-9]$/;
         if (!validNumbers.test(_digit)) {
           return false;
