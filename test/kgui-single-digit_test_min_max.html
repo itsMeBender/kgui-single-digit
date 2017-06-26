@@ -19,19 +19,27 @@
     </test-fixture>
 
     <script>
-      suite('kgui-single-digit', function () {
+      /* global
+          suite, setup, fixture, test, assert
+       */
 
-        var buttons;  // There are two buttons; ADD 1, SUBTRACT 1.
+      suite('kgui-single-digit', function() {
+        var buttons; // There are two buttons; ADD 1, SUBTRACT 1.
         var DOWN = 1;
-        var element;  // The <kgui-single-digit> - element
+        var element; // The <kgui-single-digit> - element
         var UP = 0;
 
-        function eventFire (el, etype) {
+        /**
+         * To fire a CLICK event on those ADD, SUBTRACT buttons.
+         * @param {Element} el element object to dispatch the EVENT `type` on.
+         * @param {String} eType stands for EventType
+         */
+        function eventFire(el, eType) {
           if (el.fireEvent) {
-            el.fireEvent('on' + etype);
+            el.fireEvent('on' + eType);
           } else {
             var evObj = document.createEvent('Events');
-            evObj.initEvent(etype, true, false);
+            evObj.initEvent(eType, true, false);
             el.dispatchEvent(evObj);
           }
         }
@@ -41,132 +49,129 @@
         // Will be executed at the beginning of every test().
         // -----------------------------------------------------------------------------------
 
-        setup(function () {
-            element = fixture("basic");
-            buttons = element.querySelectorAll("paper-icon-button");
-
+        setup(function() {
+            element = fixture('basic');
+            buttons = element.querySelectorAll('paper-icon-button');
         });
 
         // -----------------------------------------------------------------------------------
         // Elementary
         // -----------------------------------------------------------------------------------
 
-        test('A11 - Instantiating the default element works', function () {
+        test('A11 - Instantiating the default element works', function() {
           assert.equal(element.is, 'kgui-single-digit');
         });
 
-        test('A12 - Default DIGIT value', function () {
-          assert.equal(element.getAttribute("digit"), 5);
+        test('A12 - Default DIGIT value', function() {
+          assert.equal(element.getAttribute('digit'), 5);
         });
 
-        test('A13 - Default MIN value', function () {
-          assert.equal(element.getAttribute("min"), 3);
-          if (document.location.href.indexOf("?dom=shadow") === -1) {
+        test('A13 - Default MIN value', function() {
+          assert.equal(element.getAttribute('min'), 3);
+          if (document.location.href.indexOf('?dom=shadow') === -1) {
             assert.equal(buttons[DOWN].disabled, false);
           } else {
-            console.log("Skipping part of test A13, due to SHADOW");
+            console.log('Skipping part of test A13, due to SHADOW');
           }
         });
 
-        test('A14 - Default MAX value', function () {
-          assert.equal(element.getAttribute("max"), 7);
-          if (document.location.href.indexOf("?dom=shadow") === -1) {
+        test('A14 - Default MAX value', function() {
+          assert.equal(element.getAttribute('max'), 7);
+          if (document.location.href.indexOf('?dom=shadow') === -1) {
             assert.equal(buttons[UP].disabled, false);
           } else {
-            console.log("Skipping part of test A14, due to SHADOW");
+            console.log('Skipping part of test A14, due to SHADOW');
           }
         });
-
 
         // -----------------------------------------------------------------------------------
         // Functionality CLICK the ADD and SUBTRACT buttons.
         // -----------------------------------------------------------------------------------
 
-        if (document.location.href.indexOf("?dom=shadow") === -1) {
+        if (document.location.href.indexOf('?dom=shadow') === -1) {
           // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B11 - Counting upwards', function () {
+          test('B11 - Counting upwards', function() {
             assert.equal(buttons.length, 2);
 
             assert.equal(buttons[UP].disabled, false);
-            
-            eventFire(buttons[UP], "click");
+
+            eventFire(buttons[UP], 'click');
             assert.equal(element.digit, 6);
 
-            eventFire(buttons[UP], "click");
+            eventFire(buttons[UP], 'click');
             assert.equal(element.digit, 7);
 
             assert.equal(buttons[UP].disabled, true);
 
-            eventFire(buttons[UP], "click");
+            eventFire(buttons[UP], 'click');
             assert.equal(element.digit, 7);
 
             assert.equal(buttons[UP].disabled, true);
           });
         } else {
-          console.log("Skipping test B11, due to SHADOW");
+          console.log('Skipping test B11, due to SHADOW');
         }
-        
-        if (document.location.href.indexOf("?dom=shadow") === -1) {
+
+        if (document.location.href.indexOf('?dom=shadow') === -1) {
           // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B12 - Counting downwards', function () {
+          test('B12 - Counting downwards', function() {
             assert.equal(buttons.length, 2);
 
             assert.equal(buttons[DOWN].disabled, false);
 
-            eventFire(buttons[DOWN], "click");
+            eventFire(buttons[DOWN], 'click');
             assert.equal(element.digit, 4);
 
-            eventFire(buttons[DOWN], "click");
+            eventFire(buttons[DOWN], 'click');
             assert.equal(element.digit, 3);
 
             assert.equal(buttons[DOWN].disabled, true);
 
-            eventFire(buttons[DOWN], "click");
+            eventFire(buttons[DOWN], 'click');
             assert.equal(element.digit, 3);
 
             assert.equal(buttons[DOWN].disabled, true);
           });
         } else {
-          console.log("Skipping test B12, due to SHADOW");
+          console.log('Skipping test B12, due to SHADOW');
         }
 
         // -----------------------------------------------------------------------------------
         // Functionality CLICK the ADD and SUBTRACT buttons.
         // -----------------------------------------------------------------------------------
 
-        if (document.location.href.indexOf("?dom=shadow") === -1) {
-          test('C11 - Deactive buttons on MIN or MAX values', function () {
+        if (document.location.href.indexOf('?dom=shadow') === -1) {
+          test('C11 - Deactive buttons on MIN or MAX values', function() {
             // Prep
-            element.setAttribute("max", 9);
+            element.setAttribute('max', 9);
             assert.equal(buttons[UP].disabled, false);
-            element.setAttribute("min", 0);
+            element.setAttribute('min', 0);
             assert.equal(buttons[DOWN].disabled, false);
 
-            element.setAttribute("digit", 9);
+            element.setAttribute('digit', 9);
             assert.equal(buttons[UP].disabled, true);
             assert.equal(buttons[DOWN].disabled, false);
 
-            element.setAttribute("min", 5);
+            element.setAttribute('min', 5);
             assert.equal(buttons[DOWN].disabled, false);
-            element.setAttribute("digit", 6);
+            element.setAttribute('digit', 6);
             assert.equal(buttons[UP].disabled, false);
-            
-            element.setAttribute("max", 6);
+
+            element.setAttribute('max', 6);
             assert.equal(buttons[UP].disabled, true);
-            element.setAttribute("digit", 5);
+            element.setAttribute('digit', 5);
             assert.equal(buttons[UP].disabled, false);
             assert.equal(buttons[DOWN].disabled, true);
 
-            element.setAttribute("min", 3);
-            element.setAttribute("max", 3);
-            element.setAttribute("digit", 3);
+            element.setAttribute('min', 3);
+            element.setAttribute('max', 3);
+            element.setAttribute('digit', 3);
             assert.equal(buttons[DOWN].disabled, true);
-            assert.equal(buttons[UP].disabled, true);            
+            assert.equal(buttons[UP].disabled, true);
           });
         } else {
-          console.log("Skipping test C11, due to SHADOW");
+          console.log('Skipping test C11, due to SHADOW');
         }
-
       });
 
     </script>

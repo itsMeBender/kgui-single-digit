@@ -195,6 +195,7 @@
 
             switch (_format.substr(i, 1)) {
               case '(':
+                // Fall through
               case ')':
                 break;
               default:
@@ -202,7 +203,7 @@
                 // First item in the list is the last number (digit).
                 formatLst.unshift({
                   id: elementID,
-                  isDecimal: false,
+                  isDecimal: isDecimal,
                   isDigit: _format.substr(i, 1) === '#' ? true : false,
                   isOptional: optional,
                   node: node,
@@ -288,7 +289,7 @@
         // Writing and testing https://regex101.com/
         var validation = [
           {regx: /(?=^(#|\(#))(?=.*#$)/, msg: 'Always start with `#` OR `(#` and always end with an `#`.'},
-          {regx: /^[#\.,\(\)]+$/, msg: 'Allowed characters `.,#()`.'},
+          {regx: /^[#.,()]+$/, msg: 'Allowed characters `.,#()`.'},
           {regx: /^\(.+\)|^#/, msg: 'Missing end `)`.'},
         ];
 
@@ -388,7 +389,7 @@
         var thousandSeparator = (1111).toLocaleString().replace(/1/g, '');
 
         _format = _format ? _format : this.format;
-        _format = _format.replace(/[\(\)]/g, '');
+        _format = _format.replace(/[()]/g, '');
         _format = _format.replace(new RegExp('\\' + thousandSeparator, 'g'), '');
         _format = _format.replace(new RegExp('\\' + decimalSeparator), '.');
         maxNumber = _format.replace(/#/g, '9');
