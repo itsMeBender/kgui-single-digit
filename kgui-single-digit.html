@@ -48,45 +48,47 @@
 
       // Decrease the digit by one. Stops at `min` value given.
       decrease: function() {
-        var o = this.digit;
+        var o = this.digit; // Old value
         if (this.min) {
           if (this.digit > this.min) {
             this.digit -= 1;
             this.$.btnUp.disabled = false;
-            this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: -1});
+            this.fire('digit-changed', {n: this.digit, o: o, increment: -1});
           } else {
             this.$.btnDown.disabled = true; // Minimum range reached
+            // TODO: Send EVENT MIN REACHED
           }
         } else {
           if (this.digit === 0) {
             this.digit = 9;
-            // this.fire('digit-boundary-crossed', {n: 9, o: 0, id: this.id});
+            this.fire('digit-boundary-crossed', {n: 9, o: 0, increment: -1});
           } else {
             this.digit -= 1;
           }
-          this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: -1});
+          this.fire('digit-changed', {n: this.digit, o: o, increment: -1});
         }
       },
 
       // Increase the digit by one. Stops at `max` value given.
       increase: function() {
-        var o = this.digit;
+        var o = this.digit; // Old value
         if (this.max) {
           if (this.digit < this.max) {
             this.digit += 1;
             this.$.btnDown.disabled = false;
-            this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: 1});
+            this.fire('digit-changed', {n: this.digit, o: o, increment: 1});
           } else {
             this.$.btnUp.disabled = true; // Maximum range reached
+            // TODO: Send EVENT MAX REACHED
           }
         } else {
           if (this.digit === 9) {
             this.digit = 0;
-            // this.fire('digit-boundary-crossed', {n: 0, o: 9, id: this.id});
+            this.fire('digit-boundary-crossed', {n: 0, o: 9, increment: 1});
           } else {
             this.digit += 1;
           }
-          this.fire('digit-changed', {n: this.digit, o: o, id: this.id, increment: 1});
+          this.fire('digit-changed', {n: this.digit, o: o, increment: 1});
         }
       },
 

@@ -115,7 +115,10 @@
             assert.equal(element.digit, 0);
           });
         } else {
-          console.log('Skipping test B01, due to SHADOW');
+          throw new {
+            'message': 'Skipping test B01, due to SHADOW',
+            'name': 'Error',
+          };
         }
 
         if (document.location.href.indexOf('?dom=shadow') === -1) {
@@ -154,7 +157,10 @@
             assert.equal(element.digit, 0);
           });
         } else {
-          console.log('Skipping test B02, due to SHADOW');
+          throw new {
+            'message': 'Skipping test B02, due to SHADOW',
+            'name': 'Error',
+          };
         }
 
         // -----------------------------------------------------------------------------------
@@ -252,7 +258,7 @@
             sinon.spy(element, 'fire');
 
             eventFire(buttons[UP], 'click'); // Move to digit '0'
-            expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 0, o: 9, id: ''});
+            expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 0, o: 9, increment: 1});
           });
 
           test('F02 - Border BOTTOM range `digit-boundary-crossed` event.', function() {
@@ -260,10 +266,13 @@
             sinon.spy(element, 'fire');
 
             eventFire(buttons[DOWN], 'click'); // Move to digit '9'
-            expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 9, o: 0, id: ''});
+            expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 9, o: 0, increment: -1});
           });
         } else {
-          console.log('Skipping test F01, due to SHADOW');
+          throw new {
+            'message': 'Skipping test Fxx, due to SHADOW',
+            'name': 'Error',
+          };
         }
       });
 

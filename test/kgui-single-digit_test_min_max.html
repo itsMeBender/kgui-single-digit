@@ -71,7 +71,10 @@
           if (document.location.href.indexOf('?dom=shadow') === -1) {
             assert.equal(buttons[DOWN].disabled, false);
           } else {
-            console.log('Skipping part of test A13, due to SHADOW');
+            throw new {
+              'message': 'Skipping test A13, due to SHADOW',
+              'name': 'Error',
+            };
           }
         });
 
@@ -80,7 +83,10 @@
           if (document.location.href.indexOf('?dom=shadow') === -1) {
             assert.equal(buttons[UP].disabled, false);
           } else {
-            console.log('Skipping part of test A14, due to SHADOW');
+            throw new {
+              'message': 'Skipping test A14, due to SHADOW',
+              'name': 'Error',
+            };
           }
         });
 
@@ -109,7 +115,10 @@
             assert.equal(buttons[UP].disabled, true);
           });
         } else {
-          console.log('Skipping test B11, due to SHADOW');
+          throw new {
+            'message': 'Skipping test B11, due to SHADOW',
+            'name': 'Error',
+          };
         }
 
         if (document.location.href.indexOf('?dom=shadow') === -1) {
@@ -133,7 +142,10 @@
             assert.equal(buttons[DOWN].disabled, true);
           });
         } else {
-          console.log('Skipping test B12, due to SHADOW');
+          throw new {
+            'message': 'Skipping test B12, due to SHADOW',
+            'name': 'Error',
+          };
         }
 
         // -----------------------------------------------------------------------------------
@@ -170,7 +182,10 @@
             assert.equal(buttons[UP].disabled, true);
           });
         } else {
-          console.log('Skipping test C11, due to SHADOW');
+          throw new {
+            'message': 'Skipping test C11, due to SHADOW',
+            'name': 'Error',
+          };
         }
       });
 
