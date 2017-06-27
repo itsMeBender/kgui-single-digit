@@ -51,8 +51,10 @@
         // -----------------------------------------------------------------------------------
 
         setup(function() {
-            element = fixture('basic');
-            buttons = element.querySelectorAll('paper-icon-button');
+          buttons = [];
+          element = fixture('basic');
+          buttons.push(element.$.btnUp);
+          buttons.push(element.$.btnDown);
         });
 
         // -----------------------------------------------------------------------------------
@@ -79,96 +81,87 @@
         // Functionality, BUTTONS
         // -----------------------------------------------------------------------------------
 
-        if (document.location.href.indexOf('?dom=shadow') === -1) {
-          // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B01 - Counting upwards', function() {
-            assert.equal(buttons.length, 2);
+        test('B01 - Counting upwards', function() {
+          assert.equal(buttons.length, 2);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 1);
+          // digit VALUE = 0
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 1);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 2);
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 2);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 3);
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 3);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 4);
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 4);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 5);
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 5);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 6);
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 6);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 7);
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 7);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 8);
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 8);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 9);
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 9);
 
-            eventFire(buttons[UP], 'click');
-            assert.equal(element.digit, 0);
-          });
-        } else {
-          throw new {
-            'message': 'Skipping test B01, due to SHADOW',
-            'name': 'Error',
-          };
-        }
+          eventFire(buttons[UP], 'click');
+          assert.equal(element.digit, 0);
+        });
 
-        if (document.location.href.indexOf('?dom=shadow') === -1) {
-          // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('B02 - Counting downwards', function() {
-            assert.equal(buttons.length, 2);
+        test('B02 - Counting downwards', function() {
+          assert.equal(buttons.length, 2);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 9);
+          // digit VALUE = 0
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 9);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 8);
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 8);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 7);
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 7);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 6);
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 6);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 5);
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 5);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 4);
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 4);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 3);
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 3);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 2);
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 2);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 1);
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 1);
 
-            eventFire(buttons[DOWN], 'click');
-            assert.equal(element.digit, 0);
-          });
-        } else {
-          throw new {
-            'message': 'Skipping test B02, due to SHADOW',
-            'name': 'Error',
-          };
-        }
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 0);
+
+          // round 
+
+          eventFire(buttons[DOWN], 'click');
+          assert.equal(element.digit, 9);
+        });
 
         // -----------------------------------------------------------------------------------
         // Functionality, validations.
         // -----------------------------------------------------------------------------------
 
         test('C01 - _validateDigit(), valid digit', function() {
-          assert.equal(element._validateDigit(0, 9), 0);
+          assert.equal(element._validateDigit(0, 9), 0);  // 0:new digit, 9:was old digit
         });
 
         test('C02 - _validateDigit(), invalid  property `digit`, reset to old.', function() {
@@ -251,29 +244,39 @@
         // https://stackoverflow.com/questions/37114865/unit-testing-polymer-listener-that-uses-this-fire
         // -----------------------------------------------------------------------------------
 
-        if (document.location.href.indexOf('?dom=shadow') === -1) {
-          // Test not possible in SHADOW DOM, because elements are inaccessible.
-          test('F01 - Border TOP range `digit-boundary-crossed` event.', function() {
-            element.digit = 9;
-            sinon.spy(element, 'fire');
+        test('F01 - Border TOP range `digit-boundary-crossed` event.', function() {
+          element.digit = 9;
+          sinon.spy(element, 'fire');
 
-            eventFire(buttons[UP], 'click'); // Move to digit '0'
-            expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 0, o: 9, increment: 1});
-          });
+          eventFire(buttons[UP], 'click'); // Move to digit '0'
+          expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 0, o: 9, increment: 1});
+        });
 
-          test('F02 - Border BOTTOM range `digit-boundary-crossed` event.', function() {
-            element.digit = 0;
-            sinon.spy(element, 'fire');
+        test('F02 - Border BOTTOM range `digit-boundary-crossed` event.', function() {
+          element.digit = 0;
+          sinon.spy(element, 'fire');
 
-            eventFire(buttons[DOWN], 'click'); // Move to digit '9'
-            expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 9, o: 0, increment: -1});
-          });
-        } else {
-          throw new {
-            'message': 'Skipping test Fxx, due to SHADOW',
-            'name': 'Error',
-          };
-        }
+          eventFire(buttons[DOWN], 'click'); // Move to digit '9'
+          expect(element.fire).to.have.been.calledWith('digit-boundary-crossed', {n: 9, o: 0, increment: -1});
+        });
+
+        test('F03 - Border TOP range `digit-maximum-reached` event.', function() {
+          element.max = 7;
+          element.digit = 6;
+          sinon.spy(element, 'fire');
+
+          eventFire(buttons[UP], 'click'); // Move to digit '7'
+          expect(element.fire).to.have.been.calledWith('digit-maximum-reached', {max: 7});
+        });
+
+        test('F04 - Border BOTTOM range `digit-minimum-reached` event.', function() {
+          element.min = 5;
+          element.digit = 6;
+          sinon.spy(element, 'fire');
+
+          eventFire(buttons[DOWN], 'click'); // Move to digit '5'
+          expect(element.fire).to.have.been.calledWith('digit-minimum-reached', {min: 5});
+        });
       });
 
     </script>

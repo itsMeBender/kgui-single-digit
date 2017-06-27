@@ -48,15 +48,15 @@
 
       // Decrease the digit by one. Stops at `min` value given.
       decrease: function() {
-        var o = this.digit; // Old value
         if (this.min) {
           if (this.digit > this.min) {
             this.digit -= 1;
-            this.$.btnUp.disabled = false;
-            this.fire('digit-changed', {n: this.digit, o: o, increment: -1});
-          } else {
-            this.$.btnDown.disabled = true; // Minimum range reached
-            // TODO: Send EVENT MIN REACHED
+            if (this.digit === this.min) {
+              this.$.btnDown.disabled = true; // Minimum range reached
+              this.fire('digit-minimum-reached', {min: this.min});
+            } else {
+              this.$.btnUp.disabled = false;
+            }
           }
         } else {
           if (this.digit === 0) {
@@ -65,21 +65,20 @@
           } else {
             this.digit -= 1;
           }
-          this.fire('digit-changed', {n: this.digit, o: o, increment: -1});
         }
       },
 
       // Increase the digit by one. Stops at `max` value given.
       increase: function() {
-        var o = this.digit; // Old value
         if (this.max) {
           if (this.digit < this.max) {
             this.digit += 1;
-            this.$.btnDown.disabled = false;
-            this.fire('digit-changed', {n: this.digit, o: o, increment: 1});
-          } else {
-            this.$.btnUp.disabled = true; // Maximum range reached
-            // TODO: Send EVENT MAX REACHED
+            if (this.digit === this.max) {
+              this.$.btnUp.disabled = true; // Maximum range reached
+              this.fire('digit-maximum-reached', {max: this.max});
+            } else {
+              this.$.btnDown.disabled = false;
+            }
           }
         } else {
           if (this.digit === 9) {
@@ -88,14 +87,12 @@
           } else {
             this.digit += 1;
           }
-          this.fire('digit-changed', {n: this.digit, o: o, increment: 1});
         }
       },
 
       is: 'kgui-single-digit',
 
       properties: {
-
         // The value to show by default
         digit: {
           type: Number,
@@ -116,7 +113,6 @@
           type: Number,
           observer: '_validateMin',
         },
-
       },
 
       // Validate if `digit` is a number 0..9, returns actual value.
