@@ -92,6 +92,15 @@
 
       is: 'kgui-single-digit',
 
+      // True if validation of `_digit` is a number in range of 0..9
+      isNumber: function(_digit) {
+        var validNumbers = /^[0-9]$/;
+        if (!validNumbers.test(_digit)) {
+          return false;
+        }
+        return true;
+      },
+
       properties: {
         // The value to show by default
         digit: {
@@ -170,15 +179,6 @@
         }
 
         return retval;
-      },
-
-      // True if validation of `_digit` is a number in range of 0..9
-      isNumber: function(_digit) {
-        var validNumbers = /^[0-9]$/;
-        if (!validNumbers.test(_digit)) {
-          return false;
-        }
-        return true;
       },
 
     });

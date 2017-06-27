@@ -277,6 +277,20 @@
           eventFire(buttons[DOWN], 'click'); // Move to digit '5'
           expect(element.fire).to.have.been.calledWith('digit-minimum-reached', {min: 5});
         });
+
+        test('F05 - Basic `digit-changed` event.', function(done) {
+          element.addEventListener('digit-changed', function(e) {
+            if (e.detail.value === 3) {
+              assert.equal(e.detail.value, 3);
+              done();
+            }
+          });
+
+          // Digit is by default '0'.
+          eventFire(buttons[UP], 'click'); // Digit will be '1'.
+          eventFire(buttons[UP], 'click'); // Digit will be '2'.
+          eventFire(buttons[UP], 'click'); // Digit will be '3'.
+        });
       });
 
     </script>
