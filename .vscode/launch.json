@@ -4,8 +4,8 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Demo multi digit",
-            "url": "http://localhost:8081/components/kgui-single-digit/#kgui-single-digit/",
+            "name": "Test multi digit",
+            "url": "http://localhost:8081/components/kgui-single-digit/test/kgui-multi-digits_test.html",
             "webRoot": "${workspaceRoot}"
         },
         {
