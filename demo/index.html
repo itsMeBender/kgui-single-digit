@@ -29,8 +29,9 @@
       <ul>
         <li>Continuous clicking on the '+'-button, will change the digit from '9' to '0'.</li>
         <li>Continuous clicking on the '-'-button, will change the digit from '0' to '9'.</li>
-        <li>Crossing the border, background will change color.</li>
+        <li>On crossing this border, background will change color as demo.</li>
       </ul>
+      <p>Border crossing detection is possible by listen to the EVENT `<em>digit-boundary-crossed</em>`.</p>
       <demo-snippet>
         <template>
           <kgui-single-digit></kgui-single-digit>
@@ -50,17 +51,17 @@
     </div>
   </body>
   <script>
-    var loop = document.querySelector("#loop");
-    loop.addEventListener("digit-boundary-crossed", function (e) {
+    var loop = document.querySelector('#loop');
+    loop.addEventListener('digit-boundary-crossed', function(e) {
       // console.log(e.detail);
       if (e.detail.n === 9) {
         // Crossed low, from 0 to 9
-        loop.classList.add("low");
-        loop.classList.remove("high");
+        loop.classList.add('low');
+        loop.classList.remove('high');
       } else {
         // Crossed high, from 9 to 0
-        loop.classList.add("high");
-        loop.classList.remove("low");
+        loop.classList.add('high');
+        loop.classList.remove('low');
       }
     });
   </script>
