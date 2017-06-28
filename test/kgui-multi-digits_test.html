@@ -48,7 +48,7 @@
 
         // Will be executed at the beginning of every test().
         setup(function() {
-            element = fixture('basic');
+          element = fixture('basic');
         });
 
         // -----------------------------------------------------------------------------------
@@ -59,7 +59,7 @@
           assert.equal(element.is, 'kgui-multi-digits');
         });
 
-        test('A02 - Default FORMAT `(#,##)#.#`', function() {
+        test('A02 - Default format `(#,##)#.#`', function() {
           assert.equal(element.format, '(#,##)#.#');
         });
 
@@ -72,31 +72,7 @@
         // -----------------------------------------------------------------------------------
 
         // Writing and testing https://regex101.com/
-        test('B01 - validateFormat()', function() {
-          // default situation
-          assert.equal(element.format, '(#,##)#.#');
-
-          // Some acceptable formats
-          assert.equal(element.validateFormat('#'), true); // Just one digit
-          assert.equal(element.validateFormat('#,#'), true); // Two digits diveded by a ','
-          assert.equal(element.validateFormat('#.#'), true); // Two digits diveded by a ','
-          assert.equal(element.validateFormat('##.#'), true); // 00,0
-          assert.equal(element.validateFormat('(#)#.#'), true); // (0)0,0
-          assert.equal(element.validateFormat('#,###.##'), true); // (0.0.)0.0
-          assert.equal(element.validateFormat('(#.#).#.#'), true); // (0.0.)0.0
-
-          // Some unacceptable formats
-          assert.equal(element.validateFormat('a'), false); // 'Always start with '#' OR '(#' and always end with an '#'
-          assert.equal(element.validateFormat('#(#)'), false); // 'Always start with '#' OR '(#' and always end with an '#'
-          assert.equal(element.validateFormat('(#a)#'), false); // 'Allowed characters `.,#()`
-          assert.equal(element.validateFormat('(#'), false); // 'Missing end ')'
-          assert.equal(element.validateFormat('(#))#'), false); // 'No matching '()'
-          assert.equal(element.validateFormat('#)#'), false); // 'No matching '()'
-          assert.equal(element.validateFormat('(#(#))#'), false); // 'No matching '()'
-          assert.equal(element.validateFormat('(#(#)#'), false); // 'No matching '()'
-        });
-
-        test('B02 - validateNumber()', function() {
+        test('B01 - validateNumber()', function() {
           // default situation
           assert.equal(element.number, 0);
 
@@ -111,12 +87,57 @@
           assert.equal(element.validateNumber('9,9'), false, '9,9'); // COMMA is not a floating point indicator
         });
 
+        test('B02 - validateFormat(`(#,##)#.#`)', function() {
+          // Some acceptable formats
+          assert.equal(element.validateFormat('#'), true); // Just one digit
+          assert.equal(element.validateFormat('#,#'), true); // Two digits diveded by a ','
+          assert.equal(element.validateFormat('#.#'), true); // Two digits diveded by a ','
+          assert.equal(element.validateFormat('##.#'), true); // 00,0
+          assert.equal(element.validateFormat('(#)#.#'), true); // (0)0,0
+          assert.equal(element.validateFormat('#,###.##'), true); // (0.0.)0.0
+          assert.equal(element.validateFormat('(#.#).#.#'), true); // (0.0.)0.0
+
+          // Some unacceptable formats
+          assert.throws(function() {
+            element.validateFormat('a');
+          }, 'Always start with `#` OR `(#` and always end with an `#`.');
+
+          assert.throws(function() {
+            element.validateFormat('#(#)');
+          }, 'Always start with `#` OR `(#` and always end with an `#`.');
+
+          assert.throws(function() {
+            element.validateFormat('(#a)#');
+          }, 'Allowed characters `.,#()`.');
+
+          assert.throws(function() {
+            element.validateFormat('(#');
+          }, 'Missing end `)`.');
+
+          assert.throws(function() {
+            element.validateFormat('(#))#');
+          }, 'No matching `()`.');
+
+          assert.throws(function() {
+            element.validateFormat('#)#');
+          }, 'No matching `()`.');
+
+          assert.throws(function() {
+            element.validateFormat('(#(#))#');
+          }, 'No matching `()`.');
+
+          assert.throws(function() {
+            element.validateFormat('(#(#)#');
+          }, 'No matching `()`.');
+        });
+
         // Test depends on LOCAL US '9,999,999.99' and not European '9.999.999,99'.
         if (decimalSeparator === ',') { // Continental European
           test('B03 - _getMaxNumber()', function() {
             assert.equal(element._getMaxNumber('#'), 9); // Negative not supported
             assert.equal(element._getMaxNumber('######'), 999999);
             assert.equal(element._getMaxNumber('#,#'), 9.9);
+            assert.equal(element._getMaxNumber('#,###'), 9.999);
             assert.equal(element._getMaxNumber('(###)#,#'), 9999.9);
             assert.equal(element._getMaxNumber('(#.##)#.###,#'), 9999999.9);
           });
@@ -125,6 +146,7 @@
             assert.equal(element._getMaxNumber('#'), 9); // Negative not supported
             assert.equal(element._getMaxNumber('######'), 999999);
             assert.equal(element._getMaxNumber('#.#'), 9.9);
+            assert.equal(element._getMaxNumber('#.###'), 9.999);
             assert.equal(element._getMaxNumber('(###)#.#'), 9999.9);
             assert.equal(element._getMaxNumber('(#,##)#,###.#'), 9999999.9);
           });
@@ -134,44 +156,101 @@
         // Functionality
         // -----------------------------------------------------------------------------------
 
-        test('C01 - Default layout behavior MIN (0), MAX (99999) values', function() {
+        test('C01 - Default layout behavior MAX (99999) value', function() {
+// console.log(element.$.digits.querySelector('#digit0 #btnUp'));
+// console.log(element.$$('#digit0'));
+// console.log(element.$$('#digit0').$$('#btnUp'));
           element.setAttribute('format', '#####');
           element.setAttribute('number', 99999);
 
-          assert.equal(element.querySelector('#digit0 #btnUp').disabled, true);
-          assert.equal(element.querySelector('#digit1 #btnUp').disabled, true);
-          assert.equal(element.querySelector('#digit2 #btnUp').disabled, true);
-          assert.equal(element.querySelector('#digit3 #btnUp').disabled, true);
-          assert.equal(element.querySelector('#digit4 #btnUp').disabled, true);
+          assert.equal(element.$$('#digit0').$$('#btnUp').disabled, true);
+          assert.equal(element.$$('#digit1').$$('#btnUp').disabled, true);
+          assert.equal(element.$$('#digit2').$$('#btnUp').disabled, true);
+          assert.equal(element.$$('#digit3').$$('#btnUp').disabled, true);
+          assert.equal(element.$$('#digit4').$$('#btnUp').disabled, true);
 
-          assert.equal(element.querySelector('#digit0 #btnDown').disabled, false);
-          assert.equal(element.querySelector('#digit1 #btnDown').disabled, false);
-          assert.equal(element.querySelector('#digit2 #btnDown').disabled, false);
-          assert.equal(element.querySelector('#digit3 #btnDown').disabled, false);
-          assert.equal(element.querySelector('#digit4 #btnDown').disabled, false);
-
-          element.setAttribute('number', 99999);
-          assert.equal(element.querySelector('#digit0 #btnUp').disabled, false);
-          assert.equal(element.querySelector('#digit1 #btnUp').disabled, false);
-          assert.equal(element.querySelector('#digit2 #btnUp').disabled, false);
-          assert.equal(element.querySelector('#digit3 #btnUp').disabled, false);
-          assert.equal(element.querySelector('#digit4 #btnUp').disabled, false);
-
-          assert.equal(element.querySelector('#digit0 #btnDown').disabled, true);
-          assert.equal(element.querySelector('#digit1 #btnDown').disabled, true);
-          assert.equal(element.querySelector('#digit2 #btnDown').disabled, true);
-          assert.equal(element.querySelector('#digit3 #btnDown').disabled, true);
-          assert.equal(element.querySelector('#digit4 #btnDown').disabled, true);
+          assert.equal(element.$$('#digit0').$$('#btnDown').disabled, false);
+          assert.equal(element.$$('#digit1').$$('#btnDown').disabled, false);
+          assert.equal(element.$$('#digit2').$$('#btnDown').disabled, false);
+          assert.equal(element.$$('#digit3').$$('#btnDown').disabled, false);
+          assert.equal(element.$$('#digit4').$$('#btnDown').disabled, false);
         });
 
-        test('C02 - Default format layout', function() {
+        test('C02 - Default layout behavior MIN (0) value', function() {
+// console.log(element.$.digits.querySelector('#digit0 #btnUp'));
+// console.log(element.$$('#digit0'));
+// console.log(element.$$('#digit0').$$('#btnUp'));
+          element.setAttribute('format', '#####');
+          element.setAttribute('number', 12345);
+          element.setAttribute('number', 0);
+
+          assert.equal(element.$$('#digit0').$$('#btnUp').disabled, false);
+          assert.equal(element.$$('#digit1').$$('#btnUp').disabled, false);
+          assert.equal(element.$$('#digit2').$$('#btnUp').disabled, false);
+          assert.equal(element.$$('#digit3').$$('#btnUp').disabled, false);
+          assert.equal(element.$$('#digit4').$$('#btnUp').disabled, false);
+
+          assert.equal(element.$$('#digit0').$$('#btnDown').disabled, true);
+          assert.equal(element.$$('#digit1').$$('#btnDown').disabled, true);
+          assert.equal(element.$$('#digit2').$$('#btnDown').disabled, true);
+          assert.equal(element.$$('#digit3').$$('#btnDown').disabled, true);
+          assert.equal(element.$$('#digit4').$$('#btnDown').disabled, true);
+        });
+
+        test('C03 - Default format layout INTEGER', function() {
+          var nodes;
+
+          element.setAttribute('format', '##.###.###');
+          element.setAttribute('number', 12345678);
+
+          nodes = element.$.digits.childNodes;
+          assert.equal(nodes.length, 10); // Including numbers and formatters (,.)
+
+          assert.equal(nodes[0].nodeName, 'KGUI-SINGLE-DIGIT');
+          assert.equal(nodes[0].digit, '1');
+
+          assert.equal(nodes[1].nodeName, 'KGUI-SINGLE-DIGIT');
+          assert.equal(nodes[1].digit, '2');
+
+          assert.equal(nodes[2].nodeName, 'DIV');
+          assert.equal(nodes[2].textContent, '.');
+
+          assert.equal(nodes[3].nodeName, 'KGUI-SINGLE-DIGIT');
+          assert.equal(nodes[3].digit, '3');
+
+          assert.equal(nodes[4].nodeName, 'KGUI-SINGLE-DIGIT');
+          assert.equal(nodes[4].digit, '4');
+
+          assert.equal(nodes[5].nodeName, 'KGUI-SINGLE-DIGIT');
+          assert.equal(nodes[5].digit, '5');
+
+          assert.equal(nodes[6].nodeName, 'DIV');
+          assert.equal(nodes[6].textContent, '.');
+
+          assert.equal(nodes[7].nodeName, 'KGUI-SINGLE-DIGIT');
+          assert.equal(nodes[7].digit, '6');
+
+          assert.equal(nodes[8].nodeName, 'KGUI-SINGLE-DIGIT');
+          assert.equal(nodes[8].digit, '7');
+
+          assert.equal(nodes[9].nodeName, 'KGUI-SINGLE-DIGIT');
+          assert.equal(nodes[9].digit, '8');
+        });
+
+/*
+        test('C03 - Default format layout FLOAT', function(done) {
           var nodes;
 
           element.setAttribute('format', '##.###.###,##');
           element.setAttribute('number', 12345678.90);
 
-          nodes = element.querySelector('#digits').childNodes;
+          setTimeout(function() {
+
+          nodes = element.$.digits.childNodes;
           assert.equal(nodes.length, 13); // Including numbers and formatters (,.)
+console.log(nodes[0], nodes[0].digit);
+console.log(nodes[1], nodes[1].digit);
+console.log(nodes[2]);
 
           assert.equal(nodes[0].nodeName, 'KGUI-SINGLE-DIGIT');
           assert.equal(nodes[0].digit, '1');
@@ -211,7 +290,10 @@
 
           assert.equal(nodes[12].nodeName, 'KGUI-SINGLE-DIGIT');
           assert.equal(nodes[12].digit, '0');
+            done();
+          }, 10);
         });
+*/
       });
 
     </script>
