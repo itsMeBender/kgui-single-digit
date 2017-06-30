@@ -31,6 +31,7 @@
          * To fire a CLICK event on those ADD, SUBTRACT buttons.
          * @param {Element} el element object to dispatch the EVENT `type` on.
          * @param {String} eType stands for EventType
+         */
         function eventFire(el, eType) {
           if (el.fireEvent) {
             el.fireEvent('on' + eType);
@@ -40,7 +41,6 @@
             el.dispatchEvent(evObj);
           }
         }
-         */
 
         // -----------------------------------------------------------------------------------
         // Test preparation
@@ -61,6 +61,23 @@
 
         test('A02 - Default format `(#,##)#.#`', function() {
           assert.equal(element.format, '(#,##)#.#');
+
+          // Check _core data
+          assert.equal(element._core.digitCount, 5);
+
+          if (decimalSeparator === ',') { // Continental European
+            assert.equal(element._core.decimalSeparator, ',');
+            assert.equal(element._core.thousandSeparator, '.');
+            assert.equal(element._core.decimalCount, 1);
+            assert.equal(element._core.fractionCount, 4);
+            assert.equal(element._core.decimalMarkPosition, 2); // Counting from left to right, start at zero.
+          } else {
+            assert.equal(element._core.decimalSeparator, '.');
+            assert.equal(element._core.thousandSeparator, ',');
+            assert.equal(element._core.decimalCount, 4);
+            assert.equal(element._core.fractionCount, 1);
+            assert.equal(element._core.decimalMarkPosition, 7); // Counting from left to right, start at zero.
+          }
         });
 
         test('A03 - Default value 0', function() {
@@ -77,24 +94,74 @@
           assert.equal(element.number, 0);
 
           // Some acceptable numbers
-          assert.equal(element.validateNumber(1), true, '1'); // Just one digit
-          assert.equal(element.validateNumber('1'), true, '1'); // Just one digit
-          assert.equal(element.validateNumber(99), true, '99'); // two digits
-          assert.equal(element.validateNumber(123456789), true, '123456789'); // A lot digits
+          assert.equal(element.validateToNumber(1), 1); // Just one digit
+          assert.equal(element.validateToNumber('1'), 1); // Just one digit
+          assert.equal(element.validateToNumber(99), 99); // two digits
+          assert.equal(element.validateToNumber(123456789), 123456789); // A lot digits
+          assert.equal(element.validateToNumber('9,9'), 9.9); // COMMA is not a floating point indicator
 
           // Some unacceptable numbers
-          assert.equal(element.validateNumber(-1.2), false, '-1.2'); // Negative not supported
-          assert.equal(element.validateNumber('9,9'), false, '9,9'); // COMMA is not a floating point indicator
+          assert.equal(element.validateToNumber(-1.2), 0); // Negative not supported
         });
 
         test('B02 - validateFormat(`(#,##)#.#`)', function() {
           // Some acceptable formats
           assert.equal(element.validateFormat('#'), true); // Just one digit
+
+          // Check _core data
+          element.setAttribute('format', '#');
+          assert.equal(element._core.digitCount, 1);
+          assert.equal(element._core.decimalCount, 1);
+          assert.equal(element._core.fractionCount, 0);
+          assert.equal(element._core.decimalMarkPosition, undefined); // Counting from richt to left, start at zero.
+
           assert.equal(element.validateFormat('#,#'), true); // Two digits diveded by a ','
+
+          // Check _core data
+          element.setAttribute('format', '#,#');
+          assert.equal(element._core.digitCount, 2);
+          if (decimalSeparator === ',') { // Continental European
+            assert.equal(element._core.decimalCount, 1);
+            assert.equal(element._core.fractionCount, 1);
+            assert.equal(element._core.decimalMarkPosition, 1); // Counting from richt to left, start at zero.
+          } else {
+            assert.equal(element._core.decimalCount, 0);
+            assert.equal(element._core.fractionCount, 0);
+            assert.equal(element._core.decimalMarkPosition, undefined); // Counting from richt to left, start at zero.
+          }
+
           assert.equal(element.validateFormat('#.#'), true); // Two digits diveded by a ','
+
+          // Check _core data
+          element.setAttribute('format', '#.#');
+          assert.equal(element._core.digitCount, 2);
+          if (decimalSeparator === ',') { // Continental European
+            assert.equal(element._core.decimalCount, 2);
+            assert.equal(element._core.fractionCount, 0);
+            assert.equal(element._core.decimalMarkPosition, undefined); // Counting from richt to left, start at zero.
+          } else {
+            assert.equal(element._core.decimalCount, 0);
+            assert.equal(element._core.fractionCount, 2);
+            assert.equal(element._core.decimalMarkPosition, 1); // Counting from richt to left, start at zero.
+          }
+
           assert.equal(element.validateFormat('##.#'), true); // 00,0
           assert.equal(element.validateFormat('(#)#.#'), true); // (0)0,0
           assert.equal(element.validateFormat('#,###.##'), true); // (0.0.)0.0
+
+          // Check _core data
+          element.setAttribute('format', '#,###.##');
+          assert.equal(element._core.digitCount, 6);
+          if (decimalSeparator === ',') { // Continental European
+            assert.equal(element._core.decimalCount, 1);
+            assert.equal(element._core.fractionCount, 5);
+            assert.equal(element._core.decimalMarkPosition, 1); // Counting from richt to left, start at zero.
+          } else {
+            assert.equal(element._core.decimalCount, 4);
+            assert.equal(element._core.fractionCount, 2);
+            assert.equal(element._core.decimalMarkPosition, 5); // Counting from richt to left, start at zero.
+          }
+
           assert.equal(element.validateFormat('(#.#).#.#'), true); // (0.0.)0.0
 
           // Some unacceptable formats
@@ -132,34 +199,49 @@
         });
 
         // Test depends on LOCAL US '9,999,999.99' and not European '9.999.999,99'.
-        if (decimalSeparator === ',') { // Continental European
-          test('B03 - _getMaxNumber()', function() {
-            assert.equal(element._getMaxNumber('#'), 9); // Negative not supported
-            assert.equal(element._getMaxNumber('######'), 999999);
-            assert.equal(element._getMaxNumber('#,#'), 9.9);
-            assert.equal(element._getMaxNumber('#,###'), 9.999);
-            assert.equal(element._getMaxNumber('(###)#,#'), 9999.9);
-            assert.equal(element._getMaxNumber('(#.##)#.###,#'), 9999999.9);
-          });
-        } else {
-          test('B03 - _getMaxNumber()', function() {
-            assert.equal(element._getMaxNumber('#'), 9); // Negative not supported
-            assert.equal(element._getMaxNumber('######'), 999999);
-            assert.equal(element._getMaxNumber('#.#'), 9.9);
-            assert.equal(element._getMaxNumber('#.###'), 9.999);
-            assert.equal(element._getMaxNumber('(###)#.#'), 9999.9);
-            assert.equal(element._getMaxNumber('(#,##)#,###.#'), 9999999.9);
-          });
-        }
+        test('B03 - Maximum number specified by format', function() {
+          element.setAttribute('format', '#');
+          assert.equal(element._core.maxNumber, 9); // Negative not supported
+
+          element.setAttribute('format', '######');
+          assert.equal(element._core.maxNumber, 999999);
+
+          if (decimalSeparator === ',') { // Continental European
+            assert.equal(element.getAttribute('local-decimal'), ','); // Negative not supported
+
+            element.setAttribute('format', '#,#');
+            assert.equal(element._core.maxNumber, 9.9);
+
+            element.setAttribute('format', '#,###');
+            assert.equal(element._core.maxNumber, 9.999);
+
+            element.setAttribute('format', '(###)#,#');
+            assert.equal(element._core.maxNumber, 9999.9);
+
+            element.setAttribute('format', '(#.##)#.###,#');
+            assert.equal(element._core.maxNumber, 9999999.9);
+          } else {
+            assert.equal(element.getAttribute('local-decimal'), '.'); // Negative not supported
+
+            element.setAttribute('format', '#.#');
+            assert.equal(element._core.maxNumber, 9.9);
+
+            element.setAttribute('format', '#.###');
+            assert.equal(element._core.maxNumber, 9.999);
+
+            element.setAttribute('format', '(###)#.#');
+            assert.equal(element._core.maxNumber, 9999.9);
+
+            element.setAttribute('format', '(#,##)#,###.#');
+            assert.equal(element._core.maxNumber, 9999999.9);
+          }
+        });
 
         // -----------------------------------------------------------------------------------
         // Functionality
         // -----------------------------------------------------------------------------------
 
         test('C01 - Default layout behavior MAX (99999) value', function() {
-// console.log(element.$.digits.querySelector('#digit0 #btnUp'));
-// console.log(element.$$('#digit0'));
-// console.log(element.$$('#digit0').$$('#btnUp'));
           element.setAttribute('format', '#####');
           element.setAttribute('number', 99999);
 
@@ -177,9 +259,6 @@
         });
 
         test('C02 - Default layout behavior MIN (0) value', function() {
-// console.log(element.$.digits.querySelector('#digit0 #btnUp'));
-// console.log(element.$$('#digit0'));
-// console.log(element.$$('#digit0').$$('#btnUp'));
           element.setAttribute('format', '#####');
           element.setAttribute('number', 12345);
           element.setAttribute('number', 0);
@@ -197,10 +276,14 @@
           assert.equal(element.$$('#digit4').$$('#btnDown').disabled, true);
         });
 
-        test('C03 - Default format layout INTEGER', function() {
+        test('C03 - Default format layout INTEGER - thousants divider', function() {
           var nodes;
 
-          element.setAttribute('format', '##.###.###');
+          if (decimalSeparator === ',') { // Continental European
+            element.setAttribute('format', '##.###.###');
+          } else {
+            element.setAttribute('format', '##,###,###');
+          }
           element.setAttribute('number', 12345678);
 
           nodes = element.$.digits.childNodes;
@@ -235,6 +318,69 @@
 
           assert.equal(nodes[9].nodeName, 'KGUI-SINGLE-DIGIT');
           assert.equal(nodes[9].digit, '8');
+        });
+
+        test('C04 - Optional format as default', function() {
+          // TODO: Test fractions assert.equal(element.format, '(#,##)#.#');
+          if (decimalSeparator === ',') { // Continental European
+            element.setAttribute('format', '(#.##)#'); // NO DECIMAL FRACTIONS !!!!!
+          } else {
+            element.setAttribute('format', '(#,##)#'); // NO DECIMAL FRACTIONS !!!!!
+          }
+          assert.equal(element._core.digitCount, 4);
+          assert.equal(element._core.decimalCount, 4);
+          assert.equal(element._core.fractionCount, 0); // NO DECIMAL FRACTIONS !!!!!
+          assert.equal(element._core.decimalMarkPosition, undefined); // No fractions
+
+          // Visible on screen 0.0
+          assert.equal(element.number, 0); // Visible as '0'
+          assert.equal(element.$$('#digit0').digit, '0'); // 1
+          assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit1').digit, '0'); // 10
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), true);
+          assert.equal(element.$$('#digit2').digit, '0'); // 100
+          assert.equal(element.$$('#digit2').classList.contains('symbol__invisible'), true);
+          assert.equal(element.$$('#digit3').digit, '0'); // 1000
+          assert.equal(element.$$('#digit3').classList.contains('symbol__invisible'), true);
+        });
+
+        test('C05 - Optional format as default', function() {
+          // (#,#1)2
+          if (decimalSeparator === ',') { // Continental European
+            element.setAttribute('format', '(#.##)#');
+          } else {
+            element.setAttribute('format', '(#,##)#');
+          }
+
+          element.setAttribute('number', 12);
+          assert.equal(element.number, 12);
+          assert.equal(element.$$('#digit0').digit, '2'); // 1
+          assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
+
+          assert.equal(element.$$('#digit1').digit, '1'); // 10
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), false);
+
+          assert.equal(element.$$('#digit2').digit, '0'); // 100
+          assert.equal(element.$$('#digit2').classList.contains('symbol__invisible'), true);
+          assert.equal(element.$$('#token2').classList.contains('symbol__invisible'), true);
+
+          assert.equal(element.$$('#digit3').digit, '0'); // 1000
+          assert.equal(element.$$('#digit3').classList.contains('symbol__invisible'), true);
+
+          element.setAttribute('number', 123);
+          assert.equal(element.number, 123);
+          assert.equal(element.$$('#digit0').digit, '3'); // 1
+          assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
+
+          assert.equal(element.$$('#digit1').digit, '2'); // 10
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), false);
+
+          assert.equal(element.$$('#digit2').digit, '1'); // 100
+          assert.equal(element.$$('#digit2').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#token2').classList.contains('symbol__invisible'), true);
+
+          assert.equal(element.$$('#digit3').digit, '0'); // 1000
+          assert.equal(element.$$('#digit3').classList.contains('symbol__invisible'), true);
         });
 
 /*
