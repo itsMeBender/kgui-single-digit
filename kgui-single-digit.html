@@ -102,6 +102,13 @@
       },
 
       properties: {
+        // Support for the `class` attribute
+        class: {
+          type: String,
+          reflectToAttribute: true,
+          value: '',
+        },
+
         // The value to show by default
         digit: {
           type: Number,
