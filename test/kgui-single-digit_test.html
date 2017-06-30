@@ -160,6 +160,7 @@
 
         // -----------------------------------------------------------------------------------
         // Functionality, validations.
+        // _validateDigit() - validates digit and return digit or when invalid, the previous valid digit
         // -----------------------------------------------------------------------------------
 
         test('C01 - _validateDigit(), valid digit', function() {
@@ -170,12 +171,13 @@
           var testStr = '#';
 
           // Change default value
-          element.digit = 6;
+          element.setAttribute('digit', 6);
           assert.equal(element.digit, 6);
 
           assert.equal(element._validateDigit(testStr, 2), 2); // unacceptable characters
           // After invalid digit, return to previous value. Not 6 but 2 (last validation input)
           assert.equal(element.digit, 2);
+          assert.equal(element.getAttribute('digit'), 2);
         });
 
         test('C03 - _validateDigit(), invalid digit', function() {
@@ -187,6 +189,10 @@
           assert.equal(element._validateDigit(testStr, 4), 4); // unacceptable characters, too many
           assert.equal(element.digit, 4);
         });
+
+        // -----------------------------------------------------------------------------------
+        // _validateMax() - validates MAXIMUM digit and returns maximum or when invalid, the previous valid maximum
+        // -----------------------------------------------------------------------------------
 
         test('D01 - _validateMax(), valid max', function() {
           assert.equal(element._validateMax('1', 0), 1);
@@ -213,6 +219,10 @@
           assert.equal(element._validateMax(testStr, 6), 6); // unacceptable characters
           assert.equal(element.max, 6);
         });
+
+        // -----------------------------------------------------------------------------------
+        // _validateMin() - validates MINIMUM digit and returns minimum or when invalid, the previous valid minimum
+        // -----------------------------------------------------------------------------------
 
         test('E01 - _validateMin(), valid min', function() {
           assert.equal(element._validateMin('9', 0), 9);
@@ -291,7 +301,7 @@
           // Digit is by default '0'.
           eventFire(buttons[UP], 'click'); // Digit will be '1'.
           eventFire(buttons[UP], 'click'); // Digit will be '2'.
-          eventFire(buttons[UP], 'click'); // Digit will be '3'.
+          eventFire(buttons[UP], 'click'); // Digit will be '3'. Event is DONE()
         });
       });
 
