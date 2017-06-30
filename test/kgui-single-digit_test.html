@@ -102,6 +102,7 @@
 
           eventFire(buttons[UP], 'click');
           assert.equal(element.digit, 6);
+          assert.equal(element.getAttribute('digit'), 6);
 
           eventFire(buttons[UP], 'click');
           assert.equal(element.digit, 7);
@@ -125,6 +126,7 @@
 
           eventFire(buttons[DOWN], 'click');
           assert.equal(element.digit, 8);
+          assert.equal(element.getAttribute('digit'), 8);
 
           eventFire(buttons[DOWN], 'click');
           assert.equal(element.digit, 7);
