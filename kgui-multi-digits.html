@@ -12,7 +12,7 @@
       :host {
         display: block;
       }
-      .digit__invisible {
+      .symbol__invisible {
         visibility: hidden;   /* Because we want to reserve the space */
       }
       .digit--divider {
@@ -37,9 +37,9 @@
       // Find the next free DIGIT placeholder '#' from a starting position.
       findNextDigitPosition: function(dot) {
         var j = dot + 1;
-        var max = this._digits.length;
+        var max = this._core.symbols.length;
         for (; j < max; j += 1) {
-          if (this._digits[j].isDigit) {
+          if (this._core.symbols[j].isDigit) {
             return j;
           }
         }
@@ -49,9 +49,9 @@
       // Returns the position of floating point sign in `format`. Else -1.
       getFloatPosition: function() {
         var j = 0;
-        var max = this._digits.length;
+        var max = this._core.symbols.length;
         for (; j < max; j += 1) {
-          if (this._digits[j].isDecimal) {
+          if (this._core.symbols[j].isDecimalMark) {
             return j;
           }
         }
@@ -64,7 +64,7 @@
         var dot = false;
         // var maxDigits = this.format.match(/#/g).length; // At least 1 or more digits to create
 
-        this._digits.forEach(function(item, idx) {
+        this._core.symbols.forEach(function(item, idx) {
           if (item.isDigit) {
             floatStr = item.node.digit + floatStr;
           } else {
@@ -79,11 +79,16 @@
 
       is: 'kgui-multi-digits',
 
-      listeners: {
-        'digit-changed': '_digitChanged',
-      },
-
       properties: {
+
+        // Act as a SingleTon to keep `multi digits` data in synq.
+        _core: {
+          type: Object,
+          readOnly: true,
+          value: function() {
+            return {digits: [], format: null};
+          },
+        },
 
         // Digits format and number range (0 - 9999.9)
         format: {
@@ -99,24 +104,28 @@
           reflectToAttribute: true,
         },
 
-        // Array of digits objects.
-        _digits: Array,
-
+        // Local decimal separator
+        localDecimal: {
+          type: String,
+          value: (1.1).toLocaleString().replace(/1/g, ''),
+          readOnly: true,
+          reflectToAttribute: true,
+        },
       },
 
       observers: [
         '_updateDisplay(format, number)',
       ],
 
-      // Build the number according to `format` and `number`.
-      setFormat: function() {
+      // Build the number structure according to validated `format` layout.
+      setFormat: function(_format) {
         /**
          * The 'format' string is important because, it shows the maximum size of digits.
          * And which digits are always visible, at least with a '0'.
          * The '(#...)', part is hidden when the number needs it. The other part is always visible.
-         * The number (float) is centered around the '.'
+         * The number (float) is centered around the localized decimal mark, a '.' or ','
          */
-        var element = Polymer.dom(this.$.digits);
+        _format = _format ? _format : this.format;
 
         /**
          * Interpretate a `_format` string on
@@ -128,51 +137,61 @@
          * @return {Array} of objects, containing META information of the created kgui-single-digit elements.
          */
         function buildDigitFormatList(_format) {
-          var decimalSeparator = (1.1).toLocaleString().replace(/1/g, '');
-          var digitCount = _format.match(/#/g).length; // At least 1 or more digits to create
+          var digitCount;
           var elementID;
           var formatLst = [];
           var formatLength = _format.length;
           var i;
-          var isDecimal = false;
+          var isDecimalMark = false;
           var node;
           var optional = false; // Are digits part of the optional part of the form, as in '(###)'.
           var textNode;
-          var thousandSeparator = (1111).toLocaleString().replace(/1/g, '');
+
+          this._core.decimalMarkPosition = undefined;
+          this._core.fractionCount = 0; // The number of digits after the decimal mark
+          this._core.decimalCount = 0; // The number of digits before the decimal mark
+          this._core.digitCount = _format.match(/#/g).length; // Expect at least 1 or more digits to create
+          this._core.decimalSeparator = this._core.decimalSeparator
+                                      ? this._core.decimalSeparator
+                                      : (1.1).toLocaleString().replace(/1/g, '');
+          this._core.thousandSeparator = this._core.thousandSeparator
+                                       ? this._core.thousandSeparator
+                                       : (1111).toLocaleString().replace(/1/g, '');
+          digitCount = this._core.digitCount;
 
           // Determine LOCAL decimal '.'|',' separator sign
-
           // First build the digits sequence, as instructed by the format string.
-          // (##)#,###.## ~ wherby the '(##)' is the optional (hidden) part.
+          // (##)#,###.## ~ whereby the '(##)' is the optional (hidden) part.
 
           for (i = 0; i < formatLength; i += 1) {
-            isDecimal = false;
+            isDecimalMark = false;
             switch (_format.substr(i, 1)) {
-              case decimalSeparator:
-                isDecimal = true;
+              case this._core.decimalSeparator:
+                isDecimalMark = true;
+                this._core.decimalMarkPosition = i;
                 node = document.createElement('DIV');
-                textNode = document.createTextNode(decimalSeparator);
+                textNode = document.createTextNode(this._core.decimalSeparator);
                 node.setAttribute('id', elementID = 'token' + i);
                 node.appendChild(textNode);
                 if (optional) {
-                  node.setAttribute('class', 'digit__invisible digit--divider digit--decimal');
+                  node.setAttribute('class', 'symbol__invisible digit--divider digit--decimal');
                 } else {
                   node.setAttribute('class', 'digit--divider digit--decimal');
                 }
-                element.appendChild(node);
+                this._core.domAPI.appendChild(node);
                 break;
 
-              case thousandSeparator:
+              case this._core.thousandSeparator:
                 node = document.createElement('DIV');
-                textNode = document.createTextNode(thousandSeparator);
+                textNode = document.createTextNode(this._core.thousandSeparator);
                 node.setAttribute('id', elementID = 'token' + i);
                 node.appendChild(textNode);
                 if (optional) {
-                  node.setAttribute('class', 'digit__invisible digit--divider digit--thousand');
+                  node.setAttribute('class', 'symbol__invisible digit--divider digit--thousand');
                 } else {
                   node.setAttribute('class', 'digit--divider digit--thousand');
                 }
-                element.appendChild(node);
+                this._core.domAPI.appendChild(node);
                 break;
 
               case '(':
@@ -184,13 +203,23 @@
                 break;
 
               default: // '#' token
+                if (this._core.decimalMarkPosition === undefined) { // Is set, so decimal mark is known in format string.
+                  this._core.decimalCount += 1; // The number of digits before the decimal mark
+                } else {
+                  this._core.fractionCount += 1; // The number of digits after the decimal mark
+                }
+
                 node = document.createElement('KGUI-SINGLE-DIGIT');
                 digitCount -= 1;
                 node.setAttribute('id', elementID = 'digit' + digitCount); // 'token2' 'token1' , 'token0'
                 if (optional) {
-                  node.setAttribute('class', 'digit__invisible');
+                  node.setAttribute('class', 'symbol__invisible');
                 }
-                element.appendChild(node);
+                this._core.domAPI.appendChild(node);
+
+                // Needed otherwise SHADOW or SHADY will fail, not sure why
+                // https://www.polymer-project.org/1.0/docs/devguide/events
+                this.listen(node, 'digit-boundary-crossed', '_digitBoundaryCrossed');
             } // EndSwitch
 
             switch (_format.substr(i, 1)) {
@@ -203,7 +232,7 @@
                 // First item in the list is the last number (digit).
                 formatLst.unshift({
                   id: elementID,
-                  isDecimal: isDecimal,
+                  isDecimal: isDecimalMark,
                   isDigit: _format.substr(i, 1) === '#' ? true : false,
                   isOptional: optional,
                   node: node,
@@ -214,69 +243,141 @@
           return formatLst;
         }
 
-        // Remove, if available, the old digits first.
-        while (element.firstChild) {
-          element.removeChild(element.firstChild);
-        }
+        // Has format changed?
+        if (_format !== this._core.format) {
+console.log('setFormat()');
+          // Yes, Create new format as specified
+          this._core.format = _format;
+          this._core.domAPI = this._core.domAPI ? this._core.domAPI : Polymer.dom(this.$.digits);
 
-        this._digits = buildDigitFormatList(this.format);
+          // Remove, if available, the old digits first.
+          while (this._core.domAPI.firstChild) {
+            // https://www.polymer-project.org/1.0/docs/devguide/events
+            this.unlisten(this._core.domAPI.firstChild, 'digit-boundary-crossed', '_digitBoundaryCrossed');
+            this._core.domAPI.removeChild(this._core.domAPI.firstChild);
+          }
+
+          // Build the new FORMAT sequence, digit values will be filled in later.
+          this._core.symbols = buildDigitFormatList.call(this, _format);
+
+          // buildDigitFormatList() also determine `decimalSeparator`, `thousandSeparator`
+          // Determine maximum FLOAT number.
+          _format = _format.replace(/[()]/g, '');
+          _format = _format.replace(new RegExp('\\' + this._core.thousandSeparator, 'g'), '');
+          _format = _format.replace(new RegExp('\\' + this._core.decimalSeparator), '.');
+          this._core.maxNumber = parseFloat(_format.replace(/#/g, '9'), 10);
+        }
       },
 
-      // Attribute `number` changed, validate and apply
+      // Attribute `number` changed, update digits.
       setNumber: function(_float) {
         var digitObj;
         var digitValue;
         var i;
         var idx;
-        var floatStr = '00000000000' + parseInt(_float, 10).toString();
-        var tokensCount;
+        var floatStr = '';
+        var flagRange = ''; // `MIN` or `MAX` when range is reached
+        var node;
+        var symbol;
 
-        // Reset visibility depending on FORMAT
-        for (i = this._digits.length - 1; i >= 0; i -= 1) {
-          digitObj = this._digits[i];
-          digitObj.node.setAttribute('digit', '0');
-          digitObj.node.classList.remove('digit__invisible');
+        if (this._core.maxNumber === _float) {
+          flagRange = 'MAX';
+        }
+        if (_float === 0) {
+          flagRange = 'MIN';
+        }
 
-          if (digitObj.isOptional) {
-            digitObj.node.classList.add('digit__invisible');
+console.log('setNumber(' + _float + ')', flagRange);
+
+        // Reset options; visibility, MIN, MAX, DIGIT value
+        // Walk through the symbols list, containing DIGITS, DELIMITERS, DECIMAL MARK
+        for (i = 0; i < this._core.symbols.length; i += 1) {
+          symbol = this._core.symbols[i];
+          node = symbol.node;
+          node.classList.remove('symbol__invisible');
+          if (symbol.isDigit) {
+            // node.setAttribute('digit', '0'); // Default value
+            node.removeAttribute('min'); // Activate + button
+            node.removeAttribute('max'); // Activate - button
           }
         }
 
         // Set the digit number values, starting from float '.' or from the left.
-        idx = this.getFloatPosition(); // Find '.' in the `format` property
+        idx = this._core.decimalMarkPosition;
         if (idx > 0) {
           // It is a FLOAT
           idx = (idx >= 0) ? ++idx : 0; // If not, first DIGIT alway on position 0. Or next to the '.'
         } else {
-          // It is an INTEGER
-          idx = 0;
-          tokensCount = _float.toString().length;
-          for (i = 1; i <= tokensCount; i += 1) {
-            digitValue = floatStr.substr(floatStr.length - i, 1);
-            digitObj = this._digits[idx];
+          // INTEGER Display
 
-            digitObj.node.setAttribute('digit', digitValue);
-            digitObj.node.classList.remove('digit__invisible');
+          // Build prefix zero's.
+          for (i = 0; i < this._core.decimalCount; i += 1) {
+            floatStr += '0';
+          }
+          floatStr += parseFloat(_float, 10);
+          floatStr = floatStr.slice(this._core.decimalCount * -1);
+          idx = this._core.decimalCount - 1;
 
-            // Find next '#' number placeholder.
-            if ((idx = this.findNextDigitPosition(idx)) < 0) {
-              break; // Fot loop od all digits in given float
+          // Walk through digits, from RIGHT:0 to LEFT:#
+          for (i = 0; i < this._core.symbols.length; i += 1) {
+            digitObj = this._core.symbols[i]; // Can be a DIGIT, DECIMAL MARK, THOUSANT DIVIDER
+            if (digitObj.isDigit) {
+              digitValue = floatStr.substr(idx, 1); // From RIGHT to LEFT
+
+              digitObj.node.setAttribute('digit', digitValue);
+
+              // Check for MINIMUM value reached
+              if (flagRange === 'MIN') {
+                digitObj.node.setAttribute('min', 0); // This will block lowering number
+              }
+              // Check for MAXIMUM value reached
+              if (flagRange === 'MAX') {
+                digitObj.node.setAttribute('max', 9); // This will block increasing number
+              }
+
+              idx -= 1;
             }
           }
+
+          for (i = this._core.symbols.length - 1; i >= 0; i -= 1) {
+            digitObj = this._core.symbols[i]; // Can be a DIGIT, DECIMAL MARK, THOUSANT DIVIDER
+// console.log('#', i, 'ID:', digitObj.id, 'v:', digitObj.node.digit, 'isDigit:', digitObj.isDigit, 'isOption:', digitObj.isOptional);
+            if (digitObj.isDigit) {
+              if (digitObj.isOptional && digitObj.node.digit === 0) {
+                digitObj.node.classList.add('symbol__invisible');
+              } else {
+                break;
+              }
+            } else {
+              if (digitObj.isOptional) {
+                digitObj.node.classList.add('symbol__invisible');
+              }
+            }
+          }
+
+          // this.updateStyles();
         }
       },
 
-      // True when correct validation of `number`. Example "9.99".
-      validateNumber: function(_number) {
+      // If valid it returns the `Number`, else 0.
+      validateToNumber: function(_number) {
         // Writing and testing https://regex101.com/
         // TODO: No support yet for + and - sign.
-        var retval = /^\d+(\.\d+){1}$|^\d+$/.test(_number);
+        var retval;
+
         _number = _number ? _number : this.number;
 
-        if (!retval) {
-          console.log('Value "' + _number + '" is not a valid number format. Correct float example 1.2');
+        if (this.localDecimal === '.') {
+          retval = /^\d+(\.\d+){1}$|^\d+$/.test(_number); // International J- JavaScript
+        } else {
+          retval = /^\d+(,\d+){1}$|^\d+$/.test(_number); // Dutch
+          if (retval) {
+            // Make it a JavaScript Number
+            _number = parseFloat(_number.toString().replace(',', '.'), 10);
+          }
         }
-        return retval;
+
+        return retval ? parseFloat(_number, 10) : 0;
       },
 
       // True when correct validation of digit `format`. Example "(##)#,#".
@@ -296,8 +397,7 @@
         // Walk through REGEXPR validations
         for ( i = 0; i < validation.length; i += 1) {
           if (!validation[i].regx.test(_format)) {
-            console.log(validation[i].msg); // Give developer some feedback.
-            return false;
+            throw new Error(validation[i].msg, 'kgui-multi-digits.html');
           }
         }
 
@@ -308,21 +408,20 @@
         bracketB = bracketB === null ? 0 : bracketB.length; // Accept 0, 1 occurrences
 
         if (!(bracketA < 2 && bracketA === bracketB) || bracketA > 1) {
-          console.log('No matching `()`.');
-          return false;
+          throw new Error('No matching `()`.', 'kgui-multi-digits.html');
         }
 
         return true;
       },
 
       // A digit has crossed the number boundary, like from 9 to 0.
-      _digitChanged: function(e) {
-        var digitID = parseInt(e.detail.id.substr(5), 10);
+      _digitBoundaryCrossed: function(e) {
+        var digitID = parseInt(e.target.id.substr(5), 10);
         var factor;
         var flagRange = '';
         var float = parseInt(this.getDigitNumberStr(), 10); // 000.00
-        var floatPos = this.getFloatPosition(); // Example above '2', start counting from the right at '0'.
-        var max = this._getMaxNumber(); // Maximum value of the number (float), specified by format. Like 9, 99, 999, 9999, 9.99
+        var floatPos = this._core.decimalMarkPosition; // Example above '4', start counting from the left
+        var max = this._core.maxNumber; // Maximum value of the number (float), specified by format. Like 9, 99, 999, 9999, 9.99
         // var maxDigits = this.format.match(/#/g).length; // At least 1 or more digits to create
 
         floatPos = floatPos >= 0 ? floatPos : 0; // CAN BE -1, when float does not contain a '.' decimal point.
@@ -333,23 +432,21 @@
         // For a number of '1.23', clicking the '2' gives factor '0.1'.
         // For a number of '1.23', clicking the '1' gives factor '1'.
         factor = 1 / Math.pow(10, floatPos) * Math.pow(10, digitID);
-
+console.log('oldfloat', float, factor, factor * 10, e.detail);
         // detail.new digit value vs. detail.old and previous value.
-        if (e.detail.o === 9 && e.detail.increase === 1) {
-          // Increase
+        if (e.detail.increment === 1) {
           float = float + factor * 10;
         }
-        if (e.detail.o === 0 && e.detail.increase === -1) {
-          // Decrease
+        if (e.detail.increment === -1) {
           float = float - factor * 10;
         }
-
+console.log('newfloat', float);
         // Check for MINIMUM value
         if (float <= 0) {
           float = 0;
           flagRange = 'MIN';
-
-          this._digits.forEach(function(item) {
+console.log('minimum reached');
+          this._core.symbols.forEach(function(item) {
             if (item.isDigit) {
               item.node.setAttribute('min', 0);
             }
@@ -360,8 +457,9 @@
         if (float >= max) {
           float = max;
           flagRange = 'MAX';
+console.log('maximum reached');
 
-          this._digits.forEach(function(item) {
+          this._core.symbols.forEach(function(item) {
             if (item.isDigit) {
               item.node.setAttribute('max', 9);
             }
@@ -370,7 +468,8 @@
 
         if (!flagRange) {
           // Clear all MAX, MIN DIGIT values;
-          this._digits.forEach(function(item) {
+console.log('clear all');
+          this._core.symbols.forEach(function(item) {
             if (!item.isDigit) {
               item.node.removeAttribute('min');
               item.node.removeAttribute('max');
@@ -378,30 +477,16 @@
           });
         }
 
-        console.log('digitID:', factor, digitID, flagRange, float, floatPos);
+        console.log('digitID:', this.number, 'f:', factor, 'id:', digitID, flagRange, float, floatPos);
         this.setNumber(float);
       },
 
-      // Get the maximum number value, as specified by LOCAL `format`.
-      _getMaxNumber: function(_format) {
-        var decimalSeparator = (1.1).toLocaleString().replace(/1/g, '');
-        var maxNumber = 0;
-        var thousandSeparator = (1111).toLocaleString().replace(/1/g, '');
-
-        _format = _format ? _format : this.format;
-        _format = _format.replace(/[()]/g, '');
-        _format = _format.replace(new RegExp('\\' + thousandSeparator, 'g'), '');
-        _format = _format.replace(new RegExp('\\' + decimalSeparator), '.');
-        maxNumber = _format.replace(/#/g, '9');
-
-        return maxNumber;
-      },
-
-      // Update digit display with `format` and `number`
+      // Update digit display with input from `format` and `number`
       _updateDisplay: function(_format, _number) {
-        if (this.validateFormat(_format) && this.validateNumber(_number)) {
+console.log(_format, _number);
+        if (this.validateFormat(_format)) {
           this.setFormat(_format);
-          this.setNumber(_number);
+          this.setNumber(this.validateToNumber(_number));
         }
       },
 
