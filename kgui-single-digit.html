@@ -32,11 +32,11 @@
     </style>
     
     <div class="digit--container">
-      <paper-icon-button id="btnUp" class="digit--button" on-tap="increase" icon="kgui-single-digit-icons:add-circle-outline"></paper-icon-button>
+      <paper-icon-button id="btnUp" class="digit--button" on-tap="increase" on-transitionend="_onTransitionEnd" icon="kgui-single-digit-icons:add-circle-outline"></paper-icon-button>
       <div id="digit" class="digit--number">
         [[digit]]
       </div>
-      <paper-icon-button id="btnDown" class="digit--button" on-tap="decrease" icon="kgui-single-digit-icons:remove-circle-outline"></paper-icon-button>
+      <paper-icon-button id="btnDown" class="digit--button" on-tap="decrease" on-transitionend="_onTransitionEnd" icon="kgui-single-digit-icons:remove-circle-outline"></paper-icon-button>
     </div>
 
   </template>
@@ -50,8 +50,8 @@
       decrease: function() {
         if (this.min) {
           if (this.digit > this.min) {
-            this.digit -= 1;
-            if (this.digit === this.min) {
+            this.digit -= 1; // Fires EVENT 'digit-changed'
+            if (this.digit === parseInt(this.min, 10)) {
               this.$.btnDown.disabled = true; // Minimum range reached
               this.fire('digit-minimum-reached', {min: this.min});
             } else {
@@ -60,10 +60,10 @@
           }
         } else {
           if (this.digit === 0) {
-            this.digit = 9;
+            this.digit = 9; // Fires EVENT 'digit-changed'
             this.fire('digit-boundary-crossed', {n: 9, o: 0, increment: -1});
           } else {
-            this.digit -= 1;
+            this.digit -= 1; // Fires EVENT 'digit-changed'
           }
         }
       },
@@ -72,8 +72,8 @@
       increase: function() {
         if (this.max) {
           if (this.digit < this.max) {
-            this.digit += 1;
-            if (this.digit === this.max) {
+            this.digit += 1; // Fires EVENT 'digit-changed'
+            if (this.digit === parseInt(this.max, 10)) {
               this.$.btnUp.disabled = true; // Maximum range reached
               this.fire('digit-maximum-reached', {max: this.max});
             } else {
@@ -82,10 +82,10 @@
           }
         } else {
           if (this.digit === 9) {
-            this.digit = 0;
+            this.digit = 0; // Fires EVENT 'digit-changed'
             this.fire('digit-boundary-crossed', {n: 0, o: 9, increment: 1});
           } else {
-            this.digit += 1;
+            this.digit += 1; // Fires EVENT 'digit-changed'
           }
         }
       },
@@ -102,12 +102,6 @@
       },
 
       properties: {
-        // Support for the `class` attribute
-        class: {
-          type: String,
-          reflectToAttribute: true,
-          value: '',
-        },
 
         // The value to show by default
         digit: {
@@ -120,14 +114,16 @@
 
         // The maximum value. If none then loop from 9 to 0.
         max: {
-          type: Number,
+          type: String, // Don't make Number (it is, but then problems with Polymer deserilization, makes it always 0)
           observer: '_validateMax',
+          reflectToAttribute: true,
         },
 
         // The minimum value. If none then loop from 0 to 9.
         min: {
-          type: Number,
+          type: String, // Don't make Number (it is, but then problems with Polymer deserilization, makes it always 0)
           observer: '_validateMin',
+          reflectToAttribute: true,
         },
       },
 
@@ -153,39 +149,61 @@
         return retval;
       },
 
-      // Validate if `max` is a number 0..9, returns actual value.
+      // Validate if `max` is a number 0..9, returns actual MAX value or ''.
       _validateMax: function(_max, _oldMax) {
+        // console.log('_validateMax', _max, _oldMax, 'prop:', this.max);
+        // console.log('_validateMax has:', this.hasAttribute('max'), 'Prop:', this['max'], 'el', this);
         var retval;
-
-        if (!this.isNumber(_max)) {
-          retval = this.max = _oldMax; // Reset value to default
+        if (_max) {
+          if (!this.isNumber(_max)) {
+            retval = this.max = _oldMax; // Reset value to default
+          } else {
+            retval = _max;
+            if (parseInt(retval, 10) === this.digit) {
+                this.$.btnUp.disabled = true;
+            } else {
+                this.$.btnUp.disabled = false;
+            }
+          }
+          return retval;
         } else {
-          retval = _max;
+          this.$.btnUp.disabled = false;
+          return '';
         }
-        if (retval === this.digit) {
-            this.$.btnUp.disabled = true;
-        } else {
-            this.$.btnUp.disabled = false;
-        }
-        return retval;
       },
 
-      // Validate if `min` is a number 0..9, returns actual value.
+      // Validate if `min` is a number 0..9, returns actual MIN value or ''.
       _validateMin: function(_min, _oldMin) {
+        // console.log('_validateMin', _min, _oldMin, 'prop:', this.min);
         var retval;
-
-        if (!this.isNumber(_min)) {
-          retval = this.min = _oldMin; // Reset value to default
+        if (_min) {
+          if (!this.isNumber(_min)) {
+            retval = this.min = _oldMin; // Reset value to default
+          } else {
+            retval = _min;
+            if (parseInt(retval, 10) === this.digit) {
+                this.$.btnDown.disabled = true;
+            } else {
+                this.$.btnDown.disabled = false;
+            }
+          }
+          return retval;
         } else {
-          retval = _min;
+          this.$.btnDown.disabled = false;
+          return '';
         }
-        if (retval === this.digit) {
+      },
+
+      // Fix BUTTON state after RIPPLE-effect, while in multi-digit setup.
+      _onTransitionEnd: function(e) {
+        switch (this.digit.toString(10)) {
+          case this.max:
+            this.$.btnUp.disabled = true;
+            break;
+          case this.min:
             this.$.btnDown.disabled = true;
-        } else {
-            this.$.btnDown.disabled = false;
+            break;
         }
-
-        return retval;
       },
 
     });
