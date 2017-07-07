@@ -164,7 +164,7 @@
         // -----------------------------------------------------------------------------------
 
         test('C01 - _validateDigit(), valid digit', function() {
-          assert.equal(element._validateDigit(0, 9), 0); // 0:new digit, 9:was old digit
+          assert.equal(element._validateDigit(0, 9), 0); // 0:new digit, 9:(previous) old digit
         });
 
         test('C02 - _validateDigit(), invalid  property `digit`, reset to old.', function() {
@@ -277,8 +277,14 @@
           element.digit = 6;
           sinon.spy(element, 'fire');
 
+          assert.equal(element.hasAttribute('max'), true);
+          assert.equal(element.getAttribute('max'), 7);
+          assert.equal(buttons[UP].disabled, false);
+
           eventFire(buttons[UP], 'click'); // Move to digit '7'
           expect(element.fire).to.have.been.calledWith('digit-maximum-reached', {max: 7});
+
+          assert.equal(buttons[UP].disabled, true);
         });
 
         test('F04 - Border BOTTOM range `digit-minimum-reached` event.', function() {
@@ -286,8 +292,14 @@
           element.digit = 6;
           sinon.spy(element, 'fire');
 
+          assert.equal(element.hasAttribute('min'), true);
+          assert.equal(element.getAttribute('min'), 5);
+          assert.equal(buttons[DOWN].disabled, false);
+
           eventFire(buttons[DOWN], 'click'); // Move to digit '5'
           expect(element.fire).to.have.been.calledWith('digit-minimum-reached', {min: 5});
+
+          assert.equal(buttons[DOWN].disabled, true);
         });
 
         test('F05 - Basic `digit-changed` event.', function(done) {
@@ -302,6 +314,64 @@
           eventFire(buttons[UP], 'click'); // Digit will be '1'.
           eventFire(buttons[UP], 'click'); // Digit will be '2'.
           eventFire(buttons[UP], 'click'); // Digit will be '3'. Event is DONE()
+        });
+
+        // -----------------------------------------------------------------------------------
+        // API - attributes
+        // -----------------------------------------------------------------------------------
+
+        test('G01 - Element attributes vs. properties.', function() {
+          assert.equal(element.digit, 0);
+          assert.equal(element.max, null);
+          assert.equal(element.min, null);
+
+          assert.equal(element.getAttribute('digit'), 0);
+          assert.equal(element.getAttribute('max'), null);
+          assert.equal(element.getAttribute('min'), null);
+
+          //
+          // Mutation using PROPERTY
+          //
+
+          element.digit = 8;
+          element.max = 3;
+          element.min = 4;
+
+          assert.equal(element.getAttribute('digit'), '8');
+          assert.equal(element.getAttribute('max'), '3');
+          assert.equal(element.getAttribute('min'), '4');
+
+          //
+          // Mutation using ATTRIBUTES
+          //
+
+          element.setAttribute('digit', '5');
+          element.setAttribute('max', '9');
+          element.setAttribute('min', '1');
+
+          assert.equal(element.digit, '5');
+          assert.equal(element.max, '9');
+          assert.equal(element.min, '1');
+
+          // Mutation removing ATTRIBUTES
+          // https://www.polymer-project.org/1.0/docs/devguide/local-dom
+          //
+          // Polymer.dom.flush();
+          // element.distributeContent();
+
+          Polymer.dom(element).removeAttribute('digit');
+          Polymer.dom(element).removeAttribute('max');
+          Polymer.dom(element).removeAttribute('min');
+          // element.distributeContent();
+          // Polymer.dom.flush();
+
+          assert.equal(element.hasAttribute('digit'), true); // Polymer deserialisation, makes a number '0'.
+          assert.equal(element.hasAttribute('max'), false);
+          assert.equal(element.hasAttribute('min'), false);
+
+          assert.equal(element.digit, 0);
+          assert.equal(element.max, null);
+          assert.equal(element.min, null);
         });
       });
 
