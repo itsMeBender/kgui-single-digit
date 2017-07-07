@@ -4,8 +4,15 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Test multi digit",
-            "url": "http://localhost:8081/components/kgui-single-digit/test/kgui-multi-digits_test.html",
+            "name": "Demo digit",
+            "url": "http://localhost:8081/components/kgui-single-digit/",
+            "webRoot": "${workspaceRoot}"
+        },
+        {
+            "type": "chrome",
+            "request": "kanweg_test",
+            "name": "Test demo",
+            "url": "http://localhost:8081/components/kgui-single-digit/test/kanweg_test.html",
             "webRoot": "${workspaceRoot}"
         },
         {
