@@ -44,6 +44,10 @@
 
         // -----------------------------------------------------------------------------------
         // Test preparation
+        //
+        // BE WARNED
+        // The element `kgui-multi-digits` has LOCALIZED behavior. Meaning in some countries
+        // the JavaScript value of '1.8', is displayed, entered as '1,8'.
         // -----------------------------------------------------------------------------------
 
         // Will be executed at the beginning of every test().
@@ -61,48 +65,71 @@
 
         test('A02 - Default format `(#,##)#.#`', function() {
           assert.equal(element.format, '(#,##)#.#');
+          assert.equal(element.getAttribute('format'), '(#,##)#.#');
 
-          // Check _core data
-          assert.equal(element._core.digitCount, 5);
+          // Check _core data, the number of symbols
+          assert.equal(element._core.symbolCount, 5);
 
           if (decimalSeparator === ',') { // Continental European
-            assert.equal(element._core.decimalSeparator, ',');
-            assert.equal(element._core.thousandSeparator, '.');
-            assert.equal(element._core.decimalCount, 1);
-            assert.equal(element._core.fractionCount, 4);
+            assert.equal(element._core.decimalSeparator, ','); // WARNING: Is localized data
+            assert.equal(element._core.thousandSeparator, '.'); // WARNING: Is localized data
+            assert.equal(element._core.decimalCount, 1); // Number (digits) before DECIMAL MARK
+            assert.equal(element._core.fractionCount, 4); // Number (digits) after DECIMAL MARK
             assert.equal(element._core.decimalMarkPosition, 2); // Counting from left to right, start at zero.
           } else {
-            assert.equal(element._core.decimalSeparator, '.');
-            assert.equal(element._core.thousandSeparator, ',');
-            assert.equal(element._core.decimalCount, 4);
-            assert.equal(element._core.fractionCount, 1);
+            assert.equal(element._core.decimalSeparator, '.'); // WARNING: Is localized data
+            assert.equal(element._core.thousandSeparator, ','); // WARNING: Is localized data
+            assert.equal(element._core.decimalCount, 4); // Number (digits) before DECIMAL MARK
+            assert.equal(element._core.fractionCount, 1); // Number (digits) after DECIMAL MARK
             assert.equal(element._core.decimalMarkPosition, 7); // Counting from left to right, start at zero.
           }
+
+          element.format = '#';
+          element.removeAttribute('format');
+          assert.equal(element.hasAttribute('format'), true); // Because, element need always a format String.
+          assert.equal(element.format, '(#,##)#.#');
         });
 
         test('A03 - Default value 0', function() {
           assert.equal(element.number, 0);
+          assert.equal(element.getAttribute('number'), 0);
+
+          // Normal behavior Polymer 1
+          // Because it's a number it will reset to value of 0.
+          // Where JS behavior should say 'null'.
+          element.number = 9;
+          assert.equal(element.getAttribute('number'), 9);
+          element.removeAttribute('number');
+          assert.equal(element.number, 0);
+          assert.equal(element.hasAttribute('number'), true);
         });
 
         // -----------------------------------------------------------------------------------
-        // Function validateFormat()
+        // Function validateToFloat(`number`)
+        // Returns a validated JavaScript FLOAT number, if failed a '0' is returned.
+        // TODO: Support for negative numbers
         // -----------------------------------------------------------------------------------
 
-        // Writing and testing https://regex101.com/
-        test('B01 - validateNumber()', function() {
+        test('B01 - validateToFloat()', function() {
           // default situation
           assert.equal(element.number, 0);
 
           // Some acceptable numbers
-          assert.equal(element.validateToNumber(1), 1); // Just one digit
-          assert.equal(element.validateToNumber('1'), 1); // Just one digit
-          assert.equal(element.validateToNumber(99), 99); // two digits
-          assert.equal(element.validateToNumber(123456789), 123456789); // A lot digits
-          assert.equal(element.validateToNumber('9,9'), 9.9); // COMMA is not a floating point indicator
+          assert.equal(element.validateToFloat(1), 1); // Just one digit
+          assert.equal(element.validateToFloat('1'), 1); // Just one digit
+          assert.equal(element.validateToFloat(99), 99); // two digits
+          assert.equal(element.validateToFloat(123456789), 123456789); // A lot digits
+          assert.equal(element.validateToFloat('9,9'), 9.9); // COMMA is not a floating point indicator
 
           // Some unacceptable numbers
-          assert.equal(element.validateToNumber(-1.2), 0); // Negative not supported
+          assert.equal(element.validateToFloat(-1.2), 0); // Negative not supported
         });
+
+        // -----------------------------------------------------------------------------------
+        // Function validateFormat(`format`)
+        // Return TRUE when `format` is VALID.
+        // THROWS an descriptive JavaScript error when INVALID.
+        // -----------------------------------------------------------------------------------
 
         test('B02 - validateFormat(`(#,##)#.#`)', function() {
           // Some acceptable formats
@@ -110,7 +137,7 @@
 
           // Check _core data
           element.setAttribute('format', '#');
-          assert.equal(element._core.digitCount, 1);
+          assert.equal(element._core.symbolCount, 1);
           assert.equal(element._core.decimalCount, 1);
           assert.equal(element._core.fractionCount, 0);
           assert.equal(element._core.decimalMarkPosition, undefined); // Counting from richt to left, start at zero.
@@ -119,7 +146,7 @@
 
           // Check _core data
           element.setAttribute('format', '#,#');
-          assert.equal(element._core.digitCount, 2);
+          assert.equal(element._core.symbolCount, 2);
           if (decimalSeparator === ',') { // Continental European
             assert.equal(element._core.decimalCount, 1);
             assert.equal(element._core.fractionCount, 1);
@@ -134,7 +161,7 @@
 
           // Check _core data
           element.setAttribute('format', '#.#');
-          assert.equal(element._core.digitCount, 2);
+          assert.equal(element._core.symbolCount, 2);
           if (decimalSeparator === ',') { // Continental European
             assert.equal(element._core.decimalCount, 2);
             assert.equal(element._core.fractionCount, 0);
@@ -151,7 +178,7 @@
 
           // Check _core data
           element.setAttribute('format', '#,###.##');
-          assert.equal(element._core.digitCount, 6);
+          assert.equal(element._core.symbolCount, 6);
           if (decimalSeparator === ',') { // Continental European
             assert.equal(element._core.decimalCount, 1);
             assert.equal(element._core.fractionCount, 5);
@@ -164,7 +191,10 @@
 
           assert.equal(element.validateFormat('(#.#).#.#'), true); // (0.0.)0.0
 
+          //
           // Some unacceptable formats
+          //
+
           assert.throws(function() {
             element.validateFormat('a');
           }, 'Always start with `#` OR `(#` and always end with an `#`.');
@@ -198,7 +228,6 @@
           }, 'No matching `()`.');
         });
 
-        // Test depends on LOCAL US '9,999,999.99' and not European '9.999.999,99'.
         test('B03 - Maximum number specified by format', function() {
           element.setAttribute('format', '#');
           assert.equal(element._core.maxNumber, 9); // Negative not supported
@@ -206,6 +235,7 @@
           element.setAttribute('format', '######');
           assert.equal(element._core.maxNumber, 999999);
 
+          // Test depends on LOCAL US '9,999,999.99' and or European '9.999.999,99'.
           if (decimalSeparator === ',') { // Continental European
             assert.equal(element.getAttribute('local-decimal'), ','); // Negative not supported
 
@@ -238,7 +268,9 @@
         });
 
         // -----------------------------------------------------------------------------------
-        // Functionality
+        // Functionality of MINIMUM (0) and MAXIMUM (format dependent) value.
+        // When ranges reached, DIGIT buttons DEACTIVE. Preventing overflow.
+        // TODO: Support negative values.
         // -----------------------------------------------------------------------------------
 
         test('C01 - Default layout behavior MAX (99999) value', function() {
@@ -249,7 +281,7 @@
           assert.equal(element.$$('#digit1').$$('#btnUp').disabled, true);
           assert.equal(element.$$('#digit2').$$('#btnUp').disabled, true);
           assert.equal(element.$$('#digit3').$$('#btnUp').disabled, true);
-          assert.equal(element.$$('#digit4').$$('#btnUp').disabled, true);
+          // assert.equal(element.$$('#digit4').$$('#btnUp').disabled, true);
 
           assert.equal(element.$$('#digit0').$$('#btnDown').disabled, false);
           assert.equal(element.$$('#digit1').$$('#btnDown').disabled, false);
@@ -273,9 +305,10 @@
           assert.equal(element.$$('#digit1').$$('#btnDown').disabled, true);
           assert.equal(element.$$('#digit2').$$('#btnDown').disabled, true);
           assert.equal(element.$$('#digit3').$$('#btnDown').disabled, true);
-          assert.equal(element.$$('#digit4').$$('#btnDown').disabled, true);
+          // assert.equal(element.$$('#digit4').$$('#btnDown').disabled, true);
         });
 
+        // TODO: Add test for DECIMAL FRACTIONS
         test('C03 - Default format layout INTEGER - thousants divider', function() {
           var nodes;
 
@@ -320,14 +353,14 @@
           assert.equal(nodes[9].digit, '8');
         });
 
+        // TODO: Test fractions assert.equal(element.format, '(#,##)#.#');
         test('C04 - Optional format as default', function() {
-          // TODO: Test fractions assert.equal(element.format, '(#,##)#.#');
           if (decimalSeparator === ',') { // Continental European
             element.setAttribute('format', '(#.##)#'); // NO DECIMAL FRACTIONS !!!!!
           } else {
             element.setAttribute('format', '(#,##)#'); // NO DECIMAL FRACTIONS !!!!!
           }
-          assert.equal(element._core.digitCount, 4);
+          assert.equal(element._core.symbolCount, 4);
           assert.equal(element._core.decimalCount, 4);
           assert.equal(element._core.fractionCount, 0); // NO DECIMAL FRACTIONS !!!!!
           assert.equal(element._core.decimalMarkPosition, undefined); // No fractions
@@ -344,6 +377,7 @@
           assert.equal(element.$$('#digit3').classList.contains('symbol__invisible'), true);
         });
 
+        // TODO: Add test for DECIMAL FRACTIONS
         test('C05 - Optional format as default', function() {
           // (#,#1)2
           if (decimalSeparator === ',') { // Continental European
@@ -352,8 +386,7 @@
             element.setAttribute('format', '(#,##)#');
           }
 
-          element.setAttribute('number', 12);
-          assert.equal(element.number, 12);
+          element.number = 12;
           assert.equal(element.$$('#digit0').digit, '2'); // 1
           assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
 
@@ -362,13 +395,13 @@
 
           assert.equal(element.$$('#digit2').digit, '0'); // 100
           assert.equal(element.$$('#digit2').classList.contains('symbol__invisible'), true);
+
           assert.equal(element.$$('#token2').classList.contains('symbol__invisible'), true);
 
           assert.equal(element.$$('#digit3').digit, '0'); // 1000
           assert.equal(element.$$('#digit3').classList.contains('symbol__invisible'), true);
 
-          element.setAttribute('number', 123);
-          assert.equal(element.number, 123);
+          element.number = 123;
           assert.equal(element.$$('#digit0').digit, '3'); // 1
           assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
 
@@ -377,69 +410,150 @@
 
           assert.equal(element.$$('#digit2').digit, '1'); // 100
           assert.equal(element.$$('#digit2').classList.contains('symbol__invisible'), false);
+
           assert.equal(element.$$('#token2').classList.contains('symbol__invisible'), true);
 
           assert.equal(element.$$('#digit3').digit, '0'); // 1000
           assert.equal(element.$$('#digit3').classList.contains('symbol__invisible'), true);
         });
 
-/*
-        test('C03 - Default format layout FLOAT', function(done) {
-          var nodes;
+        // -----------------------------------------------------------------------------------
+        // Functionality working with numbers
+        // Every digit in a MULTI DIGITS configuration, specified by 'format'.
+        // Has a +/- button to increase decrease a specific digit.
+        // If a single digit crosses a boundary, like from 9 to 0 (counting up), or
+        // from 0 to 9 (counting down.) The neigbouring digits should follow also accordingly.
+        // Example showing number '10' and decreasing digit '0' to '9'.
+        // Digit '1' will be '0', to show '09' as total number.
+        // -----------------------------------------------------------------------------------
 
-          element.setAttribute('format', '##.###.###,##');
-          element.setAttribute('number', 12345678.90);
+        // TODO: Add test for DECIMAL FRACTIONS
+        test('D01 - Test click behavior (#)#, with value 9', function() {
+          // Prepare
+          if (decimalSeparator === ',') { // Continental European
+            element.setAttribute('format', '(#)#');
+          } else {
+            element.setAttribute('format', '(#)#');
+          }
+          element.setAttribute('number', 9); // On display just '9'.
 
-          setTimeout(function() {
+          // Test begin situation
+          assert.equal(element.$$('#digit0').digit, '9');
+          assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), true);
 
-          nodes = element.$.digits.childNodes;
-          assert.equal(nodes.length, 13); // Including numbers and formatters (,.)
-console.log(nodes[0], nodes[0].digit);
-console.log(nodes[1], nodes[1].digit);
-console.log(nodes[2]);
+          // Test mouse click on + #9
+          eventFire(element.$$('#digit0').$.btnUp, 'click');
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit1').digit, '1');
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), false);
 
-          assert.equal(nodes[0].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[0].digit, '1');
+          // Test mouse click on - #0
+          eventFire(element.$$('#digit0').$.btnDown, 'click');
+          assert.equal(element.$$('#digit0').digit, '9');
+          assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), true);
 
-          assert.equal(nodes[1].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[1].digit, '2');
+          // Test MIN buttons, when LOW reached
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // Make 08
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // Make 07
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // Make 06
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // Make 05
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // Make 04
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // Make 03
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // Make 02
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // Make 01
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // Make 00
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit1').digit, '0');
+          // assert.equal(element.$$('#digit0').$.btnDown.disabled, true);
+          assert.equal(element.$$('#digit1').$.btnDown.disabled, true);
+          assert.equal(element.$$('#digit0').$.btnUp.disabled, false);
+          assert.equal(element.$$('#digit1').$.btnUp.disabled, false);
 
-          assert.equal(nodes[2].nodeName, 'DIV');
-          assert.equal(nodes[2].textContent, '.');
-
-          assert.equal(nodes[3].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[3].digit, '3');
-
-          assert.equal(nodes[4].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[4].digit, '4');
-
-          assert.equal(nodes[5].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[5].digit, '5');
-
-          assert.equal(nodes[6].nodeName, 'DIV');
-          assert.equal(nodes[6].textContent, '.');
-
-          assert.equal(nodes[7].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[7].digit, '6');
-
-          assert.equal(nodes[8].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[8].digit, '7');
-
-          assert.equal(nodes[9].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[9].digit, '8');
-
-          assert.equal(nodes[10].nodeName, 'DIV');
-          assert.equal(nodes[10].textContent, ',');
-
-          assert.equal(nodes[11].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[11].digit, '9');
-
-          assert.equal(nodes[12].nodeName, 'KGUI-SINGLE-DIGIT');
-          assert.equal(nodes[12].digit, '0');
-            done();
-          }, 10);
+          // Test MAX buttons, when HIGH reached
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 10
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 20
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 30
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 40
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 50
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 60
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 70
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 80
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 90
+          eventFire(element.$$('#digit1').$.btnUp, 'click'); // Make 99
+          assert.equal(element.$$('#digit0').digit, '9');
+          assert.equal(element.$$('#digit1').digit, '9');
+          assert.equal(element.$$('#digit0').$.btnDown.disabled, false);
+          assert.equal(element.$$('#digit1').$.btnDown.disabled, false);
+          assert.equal(element.$$('#digit0').$.btnUp.disabled, true);
+          // assert.equal(element.$$('#digit1').$.btnUp.disabled, true);
         });
-*/
+
+        test('D02 - Test click behavior on #####, with value 9999', function() {
+          // Prepare
+          element.setAttribute('format', '#####');
+          element.setAttribute('number', 9999); // On display just '9'.
+
+          // Test begin situation
+          assert.equal(element.$$('#digit0').digit, '9');
+          assert.equal(element.$$('#digit1').digit, '9');
+          assert.equal(element.$$('#digit2').digit, '9');
+          assert.equal(element.$$('#digit3').digit, '9');
+          assert.equal(element.$$('#digit4').digit, '0');
+          assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), false);
+
+          // Test mouse click on + #9##
+          eventFire(element.$$('#digit2').$.btnUp, 'click');
+          assert.equal(element.$$('#digit0').digit, '9');
+          assert.equal(element.$$('#digit1').digit, '9');
+          assert.equal(element.$$('#digit2').digit, '0');
+          assert.equal(element.$$('#digit3').digit, '0');
+          assert.equal(element.$$('#digit4').digit, '1');
+
+          // Test mouse click on + ####9
+          eventFire(element.$$('#digit0').$.btnUp, 'click');
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit2').digit, '1');
+          assert.equal(element.$$('#digit3').digit, '0');
+          assert.equal(element.$$('#digit4').digit, '1');
+
+          // Test mouse click on - 1####
+          eventFire(element.$$('#digit4').$.btnDown, 'click');
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit2').digit, '1');
+          assert.equal(element.$$('#digit3').digit, '0');
+          assert.equal(element.$$('#digit4').digit, '0');
+          assert.equal(element.$$('#digit3').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit4').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#digit0').$.btnDown.getAttribute('min'), null);
+          assert.equal(element.$$('#digit1').$.btnDown.getAttribute('min'), null);
+          assert.equal(element.$$('#digit2').$.btnDown.getAttribute('min'), null);
+          assert.equal(element.$$('#digit3').$.btnDown.getAttribute('min'), null);
+          assert.equal(element.$$('#digit4').$.btnDown.getAttribute('min'), null);
+
+          // Test mouse click on - 1####
+          eventFire(element.$$('#digit4').$.btnDown, 'click');
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit2').digit, '0');
+          assert.equal(element.$$('#digit3').digit, '0');
+          assert.equal(element.$$('#digit4').digit, '0');
+          // assert.equal(element.$$('#digit0').$.btnDown.min, 0);
+          // assert.equal(element.$$('#digit1').$.btnDown.min, 0);
+          // assert.equal(element.$$('#digit2').$.btnDown.min, 0);
+          // assert.equal(element.$$('#digit3').$.btnDown.min, 0);
+          // assert.equal(element.$$('#digit4').$.btnDown.min, 0);
+        });
       });
 
     </script>
