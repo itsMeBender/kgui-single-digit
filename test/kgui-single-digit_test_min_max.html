@@ -125,30 +125,30 @@
         // -----------------------------------------------------------------------------------
 
         test('C11 - Deactive buttons on MIN or MAX values', function() {
-          // Prep
-          element.setAttribute('max', 9);
+          // Prep  <kgui-single-digit min="3" digit="5" max="7"></kgui-single-digit>
+          element.setAttribute('max', '9');
           assert.equal(buttons[UP].disabled, false);
-          element.setAttribute('min', 0);
+          element.setAttribute('min', '0');
           assert.equal(buttons[DOWN].disabled, false);
 
-          element.setAttribute('digit', 9);
+          element.setAttribute('digit', '9');
           assert.equal(buttons[UP].disabled, true);
           assert.equal(buttons[DOWN].disabled, false);
 
-          element.setAttribute('min', 5);
+          element.setAttribute('min', '5');
           assert.equal(buttons[DOWN].disabled, false);
-          element.setAttribute('digit', 6);
+          element.setAttribute('digit', '6');
           assert.equal(buttons[UP].disabled, false);
 
-          element.setAttribute('max', 6);
+          element.setAttribute('max', '6');
           assert.equal(buttons[UP].disabled, true);
-          element.setAttribute('digit', 5);
+          element.setAttribute('digit', '5');
           assert.equal(buttons[UP].disabled, false);
           assert.equal(buttons[DOWN].disabled, true);
 
-          element.setAttribute('min', 3);
-          element.setAttribute('max', 3);
-          element.setAttribute('digit', 3);
+          element.setAttribute('min', '3');
+          element.setAttribute('max', '3');
+          element.setAttribute('digit', '3');
           assert.equal(buttons[DOWN].disabled, true);
           assert.equal(buttons[UP].disabled, true);
         });

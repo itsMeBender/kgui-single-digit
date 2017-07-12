@@ -136,12 +136,12 @@
         } else {
           retval = _digit;
         }
-        if (retval === this.min) {
+        if (retval === parseInt(this.min, 10)) {
             this.$.btnDown.disabled = true;
         } else {
             this.$.btnDown.disabled = false;
         }
-        if (retval === this.max) {
+        if (retval === parseInt(this.max, 10)) {
             this.$.btnUp.disabled = true;
         } else {
             this.$.btnUp.disabled = false;
