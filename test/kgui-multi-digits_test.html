@@ -275,7 +275,7 @@
 
         test('C01 - Default layout behavior MAX (99999) value', function() {
           element.setAttribute('format', '#####');
-          element.setAttribute('number', 99999);
+          element.setAttribute('number', '99999');
 
           assert.equal(element.$$('#digit0').$$('#btnUp').disabled, true);
           assert.equal(element.$$('#digit1').$$('#btnUp').disabled, true);
@@ -292,8 +292,8 @@
 
         test('C02 - Default layout behavior MIN (0) value', function() {
           element.setAttribute('format', '#####');
-          element.setAttribute('number', 12345);
-          element.setAttribute('number', 0);
+          element.setAttribute('number', '12345');
+          element.setAttribute('number', '0');
 
           assert.equal(element.$$('#digit0').$$('#btnUp').disabled, false);
           assert.equal(element.$$('#digit1').$$('#btnUp').disabled, false);
@@ -317,7 +317,7 @@
           } else {
             element.setAttribute('format', '##,###,###');
           }
-          element.setAttribute('number', 12345678);
+          element.setAttribute('number', '12345678');
 
           nodes = element.$.digits.childNodes;
           assert.equal(nodes.length, 10); // Including numbers and formatters (,.)
@@ -435,7 +435,7 @@
           } else {
             element.setAttribute('format', '(#)#');
           }
-          element.setAttribute('number', 9); // On display just '9'.
+          element.setAttribute('number', '9'); // On display just '9'.
 
           // Test begin situation
           assert.equal(element.$$('#digit0').digit, '9');
@@ -496,7 +496,7 @@
         test('D02 - Test click behavior on #####, with value 9999', function() {
           // Prepare
           element.setAttribute('format', '#####');
-          element.setAttribute('number', 9999); // On display just '9'.
+          element.setAttribute('number', '9999'); // On display just '9'.
 
           // Test begin situation
           assert.equal(element.$$('#digit0').digit, '9');
