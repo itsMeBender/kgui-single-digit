@@ -14,10 +14,30 @@
 
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
-  </head>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function(e) {
+        var el = document.querySelector('#localmark');
+        var pl = document.querySelector('#placeholder');
+        var localmark = el.localDecimal;
+        if (localmark === '.') {
+          el.setAttribute('format', '(#)#.##');
+          el.setAttribute('number', '1.5');
+          pl.textContent = 'DOT (.)';
+        } else {
+          el.setAttribute('format', '(#)#,##');
+          el.setAttribute('number', '1,5');
+          pl.textContent = 'COMMA (,)';
+        }
+      });
+    </script>
+
+</head>
   <body>
     <div class="vertical-section-container centered">
-      <h3>Basic kgui-single-digit demo</h3>
+      <h3>Basic multi digit (three) demo</h3>
+      <p>Using the optional digits, identified by `()`, in the format, number can expand.<br>
+      Minimal one digit visible.</p>
       <demo-snippet>
         <template>
           <kgui-multi-digits format="(##)#" number="9"></kgui-multi-digits>
@@ -26,11 +46,23 @@
     </div>
 
     <div class="vertical-section-container centered">
-      <h3>Basic demo</h3>
-      <p>Thousand digit is hidden, until number greater then 999.</p>
+      <h3>Basic demo, using 4 digits.</h3>
+      <p>Thousand digit is hidden, until number greater then 999.<br>
+      </p>
       <demo-snippet>
         <template>
           <kgui-multi-digits format="(##)##" number="987"></kgui-multi-digits>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <div class="vertical-section-container centered">
+      <h3>Basic demo, using local decimal mark.</h3>
+      <p>The local <em>DECIMAL MARK</em> is active here. Can change per country, such as '0.0' or '0,0'.</p>
+      <p>Your current DECIMAL local is <strong><span id="placeholder"></span></strong>.</p>
+      <demo-snippet>
+        <template>
+          <kgui-multi-digits id="localmark" format="(#)#.##" number="0"></kgui-multi-digits>
         </template>
       </demo-snippet>
     </div>
