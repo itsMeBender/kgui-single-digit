@@ -29,6 +29,11 @@ It is part of a construction where multiple singe digits interacts and can modif
 
 * Single digit manipulation.
 * Localization of the decimal-mark.
-* Multiple digita manipulation, using \<kgui-multi-digits\>.
-* Allow large number formatting.
+* Multiple digits manipulation, using `\<kgui-multi-digits\>.`
+* Allow large number formatting, using dividers.
 * Number format also defines maximum size of the number. As in the format `###`, with number range from 0 .. 999.
+
+## Future enhancements
+
+* Decimals (I'm working on this (july'17).
+* Negative numbers.
