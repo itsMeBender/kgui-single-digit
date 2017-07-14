@@ -59,70 +59,110 @@
         // Elementary
         // -----------------------------------------------------------------------------------
 
-        test('A01 - Instantiating the default element works', function() {
+        test('A01 - Instantiating the default element works.', function() {
           assert.equal(element.is, 'kgui-multi-digits');
         });
 
-        test('A02 - Default format `(#,##)#.#`', function() {
-          assert.equal(element.format, '(#,##)#.#');
-          assert.equal(element.getAttribute('format'), '(#,##)#.#');
+        test('A02 - Check CORE data for default format `(##)#`.', function() {
+          assert.equal(element.format, '(##)#');
+          assert.equal(element.getAttribute('format'), '(##)#');
 
           // Check _core data, the number of symbols
-          assert.equal(element._core.symbolCount, 5);
+          assert.equal(element._core.digitCount, 3);
 
           if (decimalSeparator === ',') { // Continental European
             assert.equal(element._core.decimalSeparator, ','); // WARNING: Is localized data
             assert.equal(element._core.thousandSeparator, '.'); // WARNING: Is localized data
-            assert.equal(element._core.decimalCount, 1); // Number (digits) before DECIMAL MARK
-            assert.equal(element._core.fractionCount, 4); // Number (digits) after DECIMAL MARK
-            assert.equal(element._core.decimalMarkPosition, 2); // Counting from left to right, start at zero.
           } else {
             assert.equal(element._core.decimalSeparator, '.'); // WARNING: Is localized data
             assert.equal(element._core.thousandSeparator, ','); // WARNING: Is localized data
-            assert.equal(element._core.decimalCount, 4); // Number (digits) before DECIMAL MARK
-            assert.equal(element._core.fractionCount, 1); // Number (digits) after DECIMAL MARK
-            assert.equal(element._core.decimalMarkPosition, 7); // Counting from left to right, start at zero.
           }
+
+          assert.equal(element._core.decimalCount, 3); // Number (digits) before DECIMAL MARK
+          assert.equal(element._core.fractionCount, 0); // Number (digits) after DECIMAL MARK
+          assert.equal(element._core.formatDecimalMarkPosition, null); // Counting from left to right, start at zero.
+          assert.equal(element._core.formatAsZeroNumber, '000');
+          assert.equal(element._core.digitCount, 3); // Symbols are #, DECIMAL and THOUSAND marks
+
+          // Sybols list '_core.symbols'
+          assert.equal(element._core.symbols.length, 3); // Symbols are #, DECIMAL and THOUSAND marks
+          assert.equal(element._core.symbols[0].id, 'digit0'); // From RIGHT to LEFT
+          assert.equal(element._core.symbols[0].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
+          assert.equal(element._core.symbols[0].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[0].isDigit, true);
+          assert.equal(element._core.symbols[0].isOptional, false);
+
+          assert.equal(element._core.symbols[1].id, 'digit1'); // From RIGHT to LEFT
+          assert.equal(element._core.symbols[1].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
+          assert.equal(element._core.symbols[1].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[1].isDigit, true);
+          assert.equal(element._core.symbols[1].isOptional, true);
+
+          assert.equal(element._core.symbols[2].id, 'digit2'); // From RIGHT to LEFT
+          assert.equal(element._core.symbols[2].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
+          assert.equal(element._core.symbols[2].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[2].isDigit, true);
+          assert.equal(element._core.symbols[2].isOptional, true);
 
           element.format = '#';
           element.removeAttribute('format');
           assert.equal(element.hasAttribute('format'), true); // Because, element need always a format String.
-          assert.equal(element.format, '(#,##)#.#');
+          assert.equal(element.format, '(##)#');
         });
 
-        test('A03 - Default value 0', function() {
-          assert.equal(element.number, 0);
-          assert.equal(element.getAttribute('number'), 0);
+        test('A03 - Check absence of format string, forcing default.', function() {
+          assert.equal(element.format, '(##)#');
+          element.format = '#';
+          element.removeAttribute('format');
+          assert.equal(element.hasAttribute('format'), true); // Because, element need always a format String.
+          assert.equal(element.format, '(##)#');
+          assert.equal(element.getAttribute('format'), '(##)#');
+        });
+
+        test('A04 - Check default number value `0`.', function() {
+          assert.equal(element.number, '0');
+          assert.equal(element._number, 0);
+          assert.equal(element.getAttribute('number'), '0');
+        });
+
+        test('A05 - Check absence of number value.', function() {
+          assert.equal(element.number, '0');
 
           // Normal behavior Polymer 1
           // Because it's a number it will reset to value of 0.
           // Where JS behavior should say 'null'.
-          element.number = 9;
-          assert.equal(element.getAttribute('number'), 9);
+          // THAT IS WHY element.number is a String. '' Acts as unset.
+          element.number = '9';
+          assert.equal(element.getAttribute('number'), '9');
+          assert.equal(element._number, 9);
           element.removeAttribute('number');
-          assert.equal(element.number, 0);
+          assert.equal(element.number, '0');
           assert.equal(element.hasAttribute('number'), true);
+          assert.equal(element.getAttribute('number'), '0');
         });
 
         // -----------------------------------------------------------------------------------
-        // Function validateToFloat(`number`)
-        // Returns a validated JavaScript FLOAT number, if failed a '0' is returned.
+        // Function validateNumber(`number`)
+        // Returns TRUE if a valid local DECIMAL MARKED number was given ('.' or ',').
         // TODO: Support for negative numbers
         // -----------------------------------------------------------------------------------
 
-        test('B01 - validateToFloat()', function() {
-          // default situation
-          assert.equal(element.number, 0);
-
+        test('B01 - Function validateNumber() behavior.', function() {
           // Some acceptable numbers
-          assert.equal(element.validateToFloat(1), 1); // Just one digit
-          assert.equal(element.validateToFloat('1'), 1); // Just one digit
-          assert.equal(element.validateToFloat(99), 99); // two digits
-          assert.equal(element.validateToFloat(123456789), 123456789); // A lot digits
-          // TODO: DECIMAL POINT CALULATION assert.equal(element.validateToFloat('9,9'), 9.9); // COMMA is not a floating point indicator
+          assert.equal(element.validateNumber(1), true); // Just one digit
+          assert.equal(element.validateNumber('1'), true); // Just one digit
+          assert.equal(element.validateNumber(99), true); // two digits
+          assert.equal(element.validateNumber(123456789), true); // A lot digits
 
-          // Some unacceptable numbers
-          assert.equal(element.validateToFloat(-1.2), 0); // Negative not supported
+          if (decimalSeparator === ',') { // Continental European
+            assert.equal(element.validateNumber('1,1'), true); // Local DECIMAL MARK ','
+            // Some unacceptable numbers
+            assert.equal(element.validateNumber('1.2'), false);
+          } else {
+            assert.equal(element.validateNumber('1.1'), true); // Local DECIMAL MARK '.'
+            // Some unacceptable numbers
+            assert.equal(element.validateNumber('1,2'), false);
+          }
         });
 
         // -----------------------------------------------------------------------------------
@@ -131,70 +171,89 @@
         // THROWS an descriptive JavaScript error when INVALID.
         // -----------------------------------------------------------------------------------
 
-        test('B02 - validateFormat(`(#,##)#.#`)', function() {
+        test('B02 - Function validateFormat(NO DECIMAL MARKER) behaviour, updates CORE data.', function() {
           // Some acceptable formats
           assert.equal(element.validateFormat('#'), true); // Just one digit
-
           // Check _core data
           element.setAttribute('format', '#');
-          assert.equal(element._core.symbolCount, 1);
-          assert.equal(element._core.decimalCount, 1);
+          assert.equal(element._core.digitCount, 1);
+          assert.equal(element._core.decimalCount, 1); // No DECIMAL MARKER available
           assert.equal(element._core.fractionCount, 0);
-          assert.equal(element._core.decimalMarkPosition, undefined); // Counting from richt to left, start at zero.
+          assert.equal(element._core.formatDecimalMarkPosition, null); // Counting from richt to left, start at zero.
 
-          assert.equal(element.validateFormat('#,#'), true); // Two digits diveded by a ','
-
+          assert.equal(element.validateFormat('##########'), true); // Ten digits, stress test
           // Check _core data
-          element.setAttribute('format', '#,#');
-          assert.equal(element._core.symbolCount, 2);
-          if (decimalSeparator === ',') { // Continental European
-            assert.equal(element._core.decimalCount, 1);
-            assert.equal(element._core.fractionCount, 1);
-            assert.equal(element._core.decimalMarkPosition, 1); // Counting from richt to left, start at zero.
-          } else {
-            assert.equal(element._core.decimalCount, 0);
-            assert.equal(element._core.fractionCount, 0);
-            assert.equal(element._core.decimalMarkPosition, undefined); // Counting from richt to left, start at zero.
-          }
+          element.setAttribute('format', '##########');
+          assert.equal(element._core.digitCount, 10);
+          assert.equal(element._core.decimalCount, 10); // No DECIMAL MARKER available
+          assert.equal(element._core.fractionCount, 0);
+          assert.equal(element._core.formatDecimalMarkPosition, null); // Counting from richt to left, start at zero.
+        });
 
-          assert.equal(element.validateFormat('#.#'), true); // Two digits diveded by a ','
-
-          // Check _core data
-          element.setAttribute('format', '#.#');
-          assert.equal(element._core.symbolCount, 2);
-          if (decimalSeparator === ',') { // Continental European
-            assert.equal(element._core.decimalCount, 2);
-            assert.equal(element._core.fractionCount, 0);
-            assert.equal(element._core.decimalMarkPosition, undefined); // Counting from richt to left, start at zero.
-          } else {
-            assert.equal(element._core.decimalCount, 0);
-            assert.equal(element._core.fractionCount, 2);
-            assert.equal(element._core.decimalMarkPosition, 1); // Counting from richt to left, start at zero.
-          }
-
+        test('B03 - Function validateFormat(WITH DECIMAL MARKER) behaviour, updated CORE data.', function() {
+          assert.equal(element.validateFormat('#,#'), true); // Continental European
+          assert.equal(element.validateFormat('#####,#####'), true); // Continental European
+          assert.equal(element.validateFormat('#.#'), true);
+          assert.equal(element.validateFormat('#####.#####'), true);
           assert.equal(element.validateFormat('##.#'), true); // 00,0
           assert.equal(element.validateFormat('(#)#.#'), true); // (0)0,0
-          assert.equal(element.validateFormat('#,###.##'), true); // (0.0.)0.0
+          assert.equal(element.validateFormat('#,###.##'), true); // 0,000.00
+          assert.equal(element.validateFormat('(#.#).#.#'), true); // (0.0).0.0
 
-          // Check _core data
-          element.setAttribute('format', '#,###.##');
-          assert.equal(element._core.symbolCount, 6);
+          // Test depends on DECIMAL MARKER TYPE - Continental European ','or '.'
+          // Check _core data SIMPLE '#?#'
           if (decimalSeparator === ',') { // Continental European
-            assert.equal(element._core.decimalCount, 1);
-            assert.equal(element._core.fractionCount, 5);
-            assert.equal(element._core.decimalMarkPosition, 1); // Counting from richt to left, start at zero.
+            element.setAttribute('format', '#,#');
           } else {
-            assert.equal(element._core.decimalCount, 4);
-            assert.equal(element._core.fractionCount, 2);
-            assert.equal(element._core.decimalMarkPosition, 5); // Counting from richt to left, start at zero.
+            element.setAttribute('format', '#.#');
           }
+          assert.equal(element._core.decimalCount, 1);
+          assert.equal(element._core.fractionCount, 1);
+          assert.equal(element._core.digitCount, 2);
+          assert.equal(element._core.formatDecimalMarkPosition, 1); // Counting from richt to left, start at zero.
+          assert.equal(element._core.formatAsZeroNumber, '0.0');
 
-          assert.equal(element.validateFormat('(#.#).#.#'), true); // (0.0.)0.0
+          // Check _core data complex '(##)#?###?###' - THOUSAND MARKS
+          if (decimalSeparator === ',') { // Continental European
+            element.setAttribute('format', '(##)#.###,###');
+          } else {
+            element.setAttribute('format', '(##)#,###.###');
+          }
+          assert.equal(element._core.digitCount, 9); // Digits only
+          assert.equal(element._core.symbols.length, 11); // Digits plus markers (DECIMAL, THOUSAND)
+          assert.equal(element._core.fractionCount, 3);
+          assert.equal(element._core.decimalCount, 6);
+          assert.equal(element._core.formatDecimalMarkPosition, 6); // Counting from left to right, start at zero.
+          assert.equal(element._core.formatAsZeroNumber, '000000.000');
 
-          //
-          // Some unacceptable formats
-          //
+          // Check some core sybmol data
+          assert.equal(element._core.symbols[0].id, 'digit0'); // From RIGHT to LEFT
+          assert.equal(element._core.symbols[0].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
+          assert.equal(element._core.symbols[0].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[0].isDigit, true);
+          assert.equal(element._core.symbols[0].isOptional, false);
 
+          assert.equal(element._core.symbols[3].id, 'token9'); // From RIGHT to LEFT
+          assert.equal(element._core.symbols[3].isDecimal, true); // Is symbol identified as LOCAL a DECIMAL MARK
+          assert.equal(element._core.symbols[3].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[3].isDigit, false);
+          assert.equal(element._core.symbols[3].isOptional, false);
+
+          assert.equal(element._core.symbols[7].id, 'token5'); // From RIGHT to LEFT
+          assert.equal(element._core.symbols[7].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
+          assert.equal(element._core.symbols[7].isThousand, true); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[7].isDigit, false);
+          assert.equal(element._core.symbols[7].isOptional, false);
+
+          assert.equal(element._core.symbols[9].id, 'digit7'); // From RIGHT to LEFT
+          assert.equal(element._core.symbols[9].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
+          assert.equal(element._core.symbols[9].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[9].isDigit, true);
+          assert.equal(element._core.symbols[9].isOptional, true);
+        });
+
+        test('B04 - Function validateFormat() unaccepted formats.', function() {
+          // Unacceptable formats will throw ERRORS to console.
           assert.throws(function() {
             element.validateFormat('a');
           }, 'Always start with `#` OR `(#` and always end with an `#`.');
@@ -228,7 +287,7 @@
           }, 'No matching `()`.');
         });
 
-        test('B03 - Maximum number specified by format', function() {
+        test('B05 - Maximum number specified by format', function() {
           element.setAttribute('format', '#');
           assert.equal(element._core.maxNumber, 9); // Negative not supported
 
@@ -281,7 +340,7 @@
           assert.equal(element.$$('#digit1').$$('#btnUp').disabled, true);
           assert.equal(element.$$('#digit2').$$('#btnUp').disabled, true);
           assert.equal(element.$$('#digit3').$$('#btnUp').disabled, true);
-          // assert.equal(element.$$('#digit4').$$('#btnUp').disabled, true);
+          assert.equal(element.$$('#digit4').$$('#btnUp').disabled, true);
 
           assert.equal(element.$$('#digit0').$$('#btnDown').disabled, false);
           assert.equal(element.$$('#digit1').$$('#btnDown').disabled, false);
@@ -305,11 +364,11 @@
           assert.equal(element.$$('#digit1').$$('#btnDown').disabled, true);
           assert.equal(element.$$('#digit2').$$('#btnDown').disabled, true);
           assert.equal(element.$$('#digit3').$$('#btnDown').disabled, true);
-          // assert.equal(element.$$('#digit4').$$('#btnDown').disabled, true);
+          assert.equal(element.$$('#digit4').$$('#btnDown').disabled, true);
         });
 
         // TODO: Add test for DECIMAL FRACTIONS
-        test('C03 - Default format layout INTEGER - thousants divider', function() {
+        test('C03 - Default format layout INTEGER - thousands divider', function() {
           var nodes;
 
           if (decimalSeparator === ',') { // Continental European
@@ -353,20 +412,20 @@
           assert.equal(nodes[9].digit, '8');
         });
 
-        // TODO: Test fractions assert.equal(element.format, '(#,##)#.#');
+        // TODO: Test fractions assert.equal(element.format, '(##)#');
         test('C04 - Optional format as default', function() {
           if (decimalSeparator === ',') { // Continental European
             element.setAttribute('format', '(#.##)#'); // NO DECIMAL FRACTIONS !!!!!
           } else {
             element.setAttribute('format', '(#,##)#'); // NO DECIMAL FRACTIONS !!!!!
           }
-          assert.equal(element._core.symbolCount, 4);
+          assert.equal(element._core.digitCount, 4);
           assert.equal(element._core.decimalCount, 4);
           assert.equal(element._core.fractionCount, 0); // NO DECIMAL FRACTIONS !!!!!
-          assert.equal(element._core.decimalMarkPosition, undefined); // No fractions
+          assert.equal(element._core.formatDecimalMarkPosition, null); // No fractions
 
           // Visible on screen 0.0
-          assert.equal(element.number, 0); // Visible as '0'
+          assert.equal(element.number, '0'); // Visible as '0'
           assert.equal(element.$$('#digit0').digit, '0'); // 1
           assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
           assert.equal(element.$$('#digit1').digit, '0'); // 10
@@ -386,7 +445,7 @@
             element.setAttribute('format', '(#,##)#');
           }
 
-          element.number = 12;
+          element.number = '12';
           assert.equal(element.$$('#digit0').digit, '2'); // 1
           assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
 
@@ -401,7 +460,7 @@
           assert.equal(element.$$('#digit3').digit, '0'); // 1000
           assert.equal(element.$$('#digit3').classList.contains('symbol__invisible'), true);
 
-          element.number = 123;
+          element.number = '123';
           assert.equal(element.$$('#digit0').digit, '3'); // 1
           assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
 
@@ -449,7 +508,7 @@
           assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
           assert.equal(element.$$('#digit1').digit, '1');
           assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), false);
-          assert.equal(element.number, 10);
+          assert.equal(element.number, '10');
           assert.equal(element.getAttribute('number'), '10');
 
           // Test mouse click on - #0
@@ -458,7 +517,7 @@
           assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
           assert.equal(element.$$('#digit1').digit, '0');
           assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), true);
-          assert.equal(element.number, 9);
+          assert.equal(element.number, '9');
           assert.equal(element.getAttribute('number'), '9');
 
           // Test MIN buttons, when LOW reached
@@ -477,7 +536,7 @@
           assert.equal(element.$$('#digit1').$.btnDown.disabled, true);
           assert.equal(element.$$('#digit0').$.btnUp.disabled, false);
           assert.equal(element.$$('#digit1').$.btnUp.disabled, false);
-          assert.equal(element.number, 0);
+          assert.equal(element.number, '0');
           assert.equal(element.getAttribute('number'), '0');
 
           // Test MAX buttons, when HIGH reached
@@ -496,7 +555,7 @@
           assert.equal(element.$$('#digit0').$.btnDown.disabled, false);
           assert.equal(element.$$('#digit1').$.btnDown.disabled, false);
           assert.equal(element.$$('#digit0').$.btnUp.disabled, true);
-          assert.equal(element.number, 99);
+          assert.equal(element.number, '99');
           assert.equal(element.getAttribute('number'), '99');
           assert.equal(element.$$('#digit1').$.btnUp.disabled, true);
         });

@@ -19,8 +19,7 @@
       window.addEventListener('WebComponentsReady', function(e) {
         var el = document.querySelector('#localmark');
         var pl = document.querySelector('#placeholder');
-        var localmark = el.localDecimal;
-        if (localmark === '.') {
+        if (el.localDecimal === '.') {
           el.setAttribute('format', '(#)#.##');
           el.setAttribute('number', '1.5');
           pl.textContent = 'DOT (.)';
