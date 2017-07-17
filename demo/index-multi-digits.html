@@ -21,11 +21,11 @@
         var pl = document.querySelector('#placeholder');
         if (el.localDecimal === '.') {
           el.setAttribute('format', '(#)#.##');
-          el.setAttribute('number', '1.5');
+          el.setAttribute('number', '1.99');
           pl.textContent = 'DOT (.)';
         } else {
           el.setAttribute('format', '(#)#,##');
-          el.setAttribute('number', '1,5');
+          el.setAttribute('number', '1,99');
           pl.textContent = 'COMMA (,)';
         }
       });

@@ -263,25 +263,41 @@
         var idx;
         var zeroStr = ''; // Doesn't have decimal mark. Number value 1.5 is formatted as '0150'
 
+console.log('writeNumberAsDigits() digits show string `', this._getDigitFloatStr(), '` this._number:', this._number, '=', parseFloat(this._getDigitFloatStr(), 10));
         if (parseFloat(this._getDigitFloatStr(), 10) === this._number) {
-          // Abort
-          console.log('writeNumberAsDigits() digit shows', parseFloat(this._getDigitFloatStr(), 10), 'multinumber:', this._number);
+          // Abort DIGIT DISPLAY is the same the the MULTI DIGITS number
           return;
         }
 
         // Changing a single digit VALUE, or MIN, MAX can invoke writeNumberAsDigits() again.
         // Set the digit number values, starting from float '.' or from the left.
         //   _core.formatAsZeroNumber - example '00000.00'
-        //   _core.formatDecimalMarkPosition, counting from the left - example 5
+        //   _core.formatDecimalMarkPosition, counting from the left - example 5, or `null` if none.
         //   _core.decimalCount, the number of digits before the decimal mark - example 5
         //   _core.fractionCount, the number of digits after the decimal mark - example 2
         //   _number has something like '1.5'
         // We need to merge these two like '00001.50'
 
+        if (this._core.formatDecimalMarkPosition) {
+          _numberStr = this._number.toFixed(this._core.fractionCount);
+          idx = _numberStr.indexOf('.');
+        } else {
+          // No DECIMAL MARKER in number
+          _numberStr = this._number.toString(); // Is JavaScript decimal mark number, like in '0.0'
+          idx = -1;
+        }
+console.log('_numberStr:', _numberStr, this._number);
+
+/*
         _numberStr = this._number.toString(); // Is JavaScript decimal mark number, like in '0.0'
+console.log('_numberStr', _numberStr, this._number);
         idx = _numberStr.indexOf('.');
+
+*/
+
         // console.log('writeNumberAsDigits() ', idx, this._core.formatDecimalMarkPosition, this._core.formatAsZeroNumber, _numberStr, this.number, this._number, this._core.digitCount);
         if (idx !== -1) {
+          // Alternative is to use Number.toFixed(fractionCount)
           zeroStr = (this._core.formatAsZeroNumber.slice(0, this._core.decimalCount) + _numberStr.slice(0, idx))
             .slice(this._core.decimalCount * -1);
           zeroStr += (_numberStr.slice(idx + 1) + this._core.formatAsZeroNumber.slice(this._core.formatDecimalMarkPosition + 1))
@@ -369,8 +385,8 @@
         // console.log('_digitBoundaryCrossed()');
         var digitID = parseInt(e.target.id.substr(5), 10);
         var factor;
-        var float = parseInt(this._getDigitFloatStr(), 10); // 000.00
-        var floatPos = this._core.formatDecimalMarkPosition; // Example above '4', start counting from the left
+        var float = parseFloat(this._getDigitFloatStr(), 10); // 000.00
+        var floatPos = this._core.formatDecimalMarkPosition; // Example above '3', start counting from the left
         var max = this._core.maxNumber; // Maximum value of the number (float), specified by format. Like 9, 99, 999, 9999, 9.99
 
         floatPos = floatPos ? floatPos : 0; // CAN BE 'undefined', when float does not contain a decimal marker.
@@ -381,9 +397,10 @@
         // For a number of '1.23', clicking the '2' gives factor '0.1'.
         // For a number of '1.23', clicking the '1' gives factor '1'.
         factor = 1 / Math.pow(10, floatPos) * Math.pow(10, digitID);
-
+console.log('_digitBoundaryCrossed() float A:', float);
         // detail.new digit value vs. detail.old and previous value.
         float = float + factor * 10 * e.detail.increment;
+        float = float.toFixed(this._core.fractionCount);
 
         if (float <= 0) { // Check for MINIMUM value
           float = 0;
@@ -392,24 +409,28 @@
           float = max;
         }
 
-        this._set_number(float);
+        this._set_number(parseFloat(float, 10));
+console.log('_digitBoundaryCrossed() float B:', float, this._number, 'this.number:', this.number);
+        // Changing `this.number`, will invoke _checkSingleDigitChanged()
         if (this.localDecimal === '.') {
-          this.number = float.toString();
+          this.number = parseFloat(float, 10).toString();
+console.log('_digitBoundaryCrossed(), float Cjs:', this._number, 'this.number:', this.number);
         } else {
-          this.number = float.toString().replace('.', ',');
+          this.number = parseFloat(float, 10).toString().replace('.', ',');
+console.log('_digitBoundaryCrossed(), float Ceu:', this._number, 'this.number:', this.number);
         }
-        // this.writeNumberAsDigits(float.toString()); // New FLOAT number calculated, write complete number
+
+        this.writeNumberAsDigits(); // New FLOAT number calculated, write complete number
       },
 
       // Check if single digit change leads to a MINIMUM or MAXIMUM value
-      _checkSingleDigitChanged: function() {
+      _checkSingleDigitChanged: function(e) {
         // First get the current actual FLOAT NUMBER, as specified by format.
         var i;
         var newFloat = parseFloat(this._getDigitFloatStr(), 10);
         var optionActive;
         var symbol;
-
-console.log('_checkSingleDigitChanged() - new visible number:', newFloat, this._core.rendering);
+console.log('_checkSingleDigitChanged(), clicked on digit id:', e.target.id, 'digit:', e.target.digit);
         if (this._core.maxNumber === newFloat) {
           // MAXIMUM number displayed, CAN'T GO HIGHER
           this._core.symbols.forEach(function(symbol) {
@@ -435,42 +456,43 @@ console.log('_checkSingleDigitChanged() - new visible number:', newFloat, this._
           });
         }
 
-        // if (!this._core.rendering) {
-        // console.log('this._core.rendering:', this._core.rendering, this._getDigitFloatStr(), this.number);
-
-          optionActive = true; // To check if format options are active.
-          if (this._core.maxNumber !== newFloat) {
-            // Check visibility of FORMAT ELEMENTS, going from LEFT to RIGHT
-            for (i = this._core.symbols.length - 1; i >= 0; i -= 1) {
-              symbol = this._core.symbols[i]; // Symbol can be a DIGIT, DECIMAL MARK, THOUSANT DIVIDER
-              if (symbol.isDigit) {
-                if (optionActive) {
-                  if (symbol.isOptional && symbol.node.digit === 0) {
-                    // No prefix ZERO's visible
-                    symbol.node.classList.add('symbol__invisible');
-                  } else {
-                    optionActive = false; // NO optional format place holder OR a none ZERo digit value.
-                    symbol.node.classList.remove('symbol__invisible');
-                  }
+        optionActive = true; // To check if format options are active.
+        if (this._core.maxNumber !== newFloat) {
+          // Check visibility of FORMAT ELEMENTS, going from LEFT to RIGHT
+          for (i = this._core.symbols.length - 1; i >= 0; i -= 1) {
+            symbol = this._core.symbols[i]; // Symbol can be a DIGIT, DECIMAL MARK, THOUSANT DIVIDER
+            if (symbol.isDigit) {
+              if (optionActive) {
+                if (symbol.isOptional && symbol.node.digit === 0) {
+                  // No prefix ZERO's visible
+                  symbol.node.classList.add('symbol__invisible');
                 } else {
-                  // Format option overruled by number data, always show.
+                  optionActive = false; // NO optional format place holder OR a none ZERo digit value.
                   symbol.node.classList.remove('symbol__invisible');
                 }
               } else {
-                if (symbol.isOptional && optionActive) {
-                  symbol.node.classList.add('symbol__invisible');
-                }
+                // Format option overruled by number data, always show.
+                symbol.node.classList.remove('symbol__invisible');
+              }
+            } else {
+              if (symbol.isOptional && optionActive) {
+                symbol.node.classList.add('symbol__invisible');
               }
             }
           }
-        // }
-
-        this._set_number(newFloat);
-        if (this.localDecimal === '.') {
-          this.number = newFloat.toString();
-        } else {
-          this.number = newFloat.toString().replace('.', ',');
         }
+
+        newFloat = newFloat.toFixed(this._core.fractionCount);
+console.log('_checkSingleDigitChanged() newFloat:', newFloat);
+        this._set_number(parseFloat(newFloat, 10));
+        if (this.localDecimal === '.') {
+          this.number = parseFloat(newFloat, 10).toString();
+        } else {
+          this.number = parseFloat(newFloat, 10).toString().replace('.', ',');
+        }
+
+console.log('_checkSingleDigitChanged() - new visible number:', newFloat, this._number, this.number);
+        // this.writeNumberAsDigits(); // New FLOAT number calculated, write complete number
       },
 
       // Get the digits number as FLOAT string
@@ -505,7 +527,7 @@ console.log('_checkSingleDigitChanged() - new visible number:', newFloat, this._
           this._set_number(0);
           this.number = '0';
         }
-        console.log('_updateDisplay()', _format, _numberStr, this.number, this._number);
+        // console.log('_updateDisplay()', _format, _numberStr, this.number, this._number);
         this.writeNumberAsDigits();
       },
 

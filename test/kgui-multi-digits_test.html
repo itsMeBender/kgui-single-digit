@@ -367,7 +367,6 @@
           assert.equal(element.$$('#digit4').$$('#btnDown').disabled, true);
         });
 
-        // TODO: Add test for DECIMAL FRACTIONS
         test('C03 - Default format layout INTEGER - thousands divider', function() {
           var nodes;
 
@@ -412,7 +411,6 @@
           assert.equal(nodes[9].digit, '8');
         });
 
-        // TODO: Test fractions assert.equal(element.format, '(##)#');
         test('C04 - Optional format as default', function() {
           if (decimalSeparator === ',') { // Continental European
             element.setAttribute('format', '(#.##)#'); // NO DECIMAL FRACTIONS !!!!!
@@ -436,7 +434,6 @@
           assert.equal(element.$$('#digit3').classList.contains('symbol__invisible'), true);
         });
 
-        // TODO: Add test for DECIMAL FRACTIONS
         test('C05 - Optional format as default', function() {
           // (#,#1)2
           if (decimalSeparator === ',') { // Continental European
@@ -486,7 +483,6 @@
         // Digit '1' will be '0', to show '09' as total number.
         // -----------------------------------------------------------------------------------
 
-        // TODO: Add test for DECIMAL FRACTIONS
         test('D01 - Test click behavior (#)#, with value 9', function() {
           // Prepare
           if (decimalSeparator === ',') { // Continental European
