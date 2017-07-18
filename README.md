@@ -1,6 +1,6 @@
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/itsMeBender/kgui-single-digit)
 
-# Manipulating a single, multiple digits.
+# Manipulating a single and multiple digits.
 
 <!---
 ```
@@ -28,12 +28,15 @@ It is part of a construction where multiple singe digits interacts and can modif
 # Specifications
 
 * Single digit manipulation.
-* Localization of the decimal-mark.
 * Multiple digits manipulation, using `\<kgui-multi-digits\>.`
-* Allow large number formatting, using dividers.
+* Localization of the decimal-mark.
+* Allow large number formatting, using (thousand) dividers.
 * Number format also defines maximum size of the number. As in the format `###`, with number range from 0 .. 999.
+* Currently only positive numbers are supported.
 
 ## Future enhancements
 
 * Decimals (I'm working on this (july'17).
 * Negative numbers.
+* Drag /  swipe to change numbers.
+* Animation.
