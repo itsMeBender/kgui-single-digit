@@ -3,7 +3,36 @@
 <link rel="import" href="kgui-single-digit-icons.html">
 
 <!--
-`kgui-single-digit` manipulate a single digit
+With `kgui-single-digit` a user can manipulate a single digit, like '2', using a __PLUS__ or __MINUS__ button.
+
+This can be usefull in situations where a (numeric) keyboard overlay, can block other parts of the page.  
+The user can continously press the __PLUS__ or __MINUS__ button to change the digit value as in a loop. 
+
+Pressing the __PLUS__ button when the digit value was `9`. Turns the value into a `0` _and_ fires event '_digit-boundary-crossed_'. 
+The same occurs for crossing the '0' border with the __MINUS__ button. This effect can be deactivated by using attributes `min` and `max`.
+
+With the `min` and `max` attributes (properties), you can create a range for which the digit must be choosen from. 
+If the digit has reached `min` or `max` the button will be disabled and a event `digit-minimum-reached` or `digit-maximum-reached` is fired.
+
+## Events
+
+An overview of generated events:
+
+Event                    | Acting on, situation
+-------------------------|------------------------------------------------
+`digit-changed`          | When the value of the digit changes, by buttons __or__ as number.
+`digit-boundary-crossed` | When digit value crosses the `9` to `0`, or `0` to `9` boundary.
+                         | Additional `detail` {n:new-value, o:old-value, increment:Number}.
+`digit-minimum-reached`  | When digit value reaches the minimum accepted value.
+`digit-maximum-reached`  | When digit value reaches the maximum accepted value.
+
+## Styling
+
+CSS class                    | Usage                                    | Default value
+-----------------------------|------------------------------------------|----------------------------------------
+Still under construction     | ...                                      | ...
+`--primary-background-color` | Background of the complete digit element | transparent
+`--primary-text-color`       | Digit value color                        | #22a2f5 (sky blue)
 
 @demo demo/index.html
 -->
@@ -38,13 +67,13 @@
       </div>
       <paper-icon-button id="btnDown" class="digit--button" on-tap="decrease" on-transitionend="_onTransitionEnd" icon="kgui-single-digit-icons:remove-circle-outline"></paper-icon-button>
     </div>
-
   </template>
 
   <script>
     Polymer({
 
       // TODO: Add nice animation.
+      // TODO: Slide / swipe digit.
 
       // Decrease the digit by one. Stops at `min` value given.
       decrease: function() {
@@ -112,16 +141,20 @@
           reflectToAttribute: true,
         },
 
-        // The maximum value. If none then loop from 9 to 0.
+        // The maximum value. If none then continue looping from 9 to 0.
         max: {
-          type: String, // Don't make Number (it is, but then problems with Polymer deserilization, makes it always 0)
+          // Don't make Number!
+          // It is, but then problems with Polymer deserilization, makes it always 0 and not `null`, not used.
+          type: String,
           observer: '_validateMax',
           reflectToAttribute: true,
         },
 
-        // The minimum value. If none then loop from 0 to 9.
+        // The minimum value. If none then continue looping from 0 to 9.
         min: {
-          type: String, // Don't make Number (it is, but then problems with Polymer deserilization, makes it always 0)
+          // Don't make Number.
+          // It is, but then problems with Polymer deserilization, makes it always 0 and not `null`, not used.
+          type: String,
           observer: '_validateMin',
           reflectToAttribute: true,
         },
@@ -137,22 +170,20 @@
           retval = _digit;
         }
         if (retval === parseInt(this.min, 10)) {
-            this.$.btnDown.disabled = true;
+          this.$.btnDown.disabled = true;
         } else {
-            this.$.btnDown.disabled = false;
+          this.$.btnDown.disabled = false;
         }
         if (retval === parseInt(this.max, 10)) {
-            this.$.btnUp.disabled = true;
+          this.$.btnUp.disabled = true;
         } else {
-            this.$.btnUp.disabled = false;
+          this.$.btnUp.disabled = false;
         }
         return retval;
       },
 
-      // Validate if `max` is a number 0..9, returns actual MAX value or ''.
+      // Validate if `max` is a number 0..9, returns actual MAX value or `null`.
       _validateMax: function(_max, _oldMax) {
-        // console.log('_validateMax', _max, _oldMax, 'prop:', this.max);
-        // console.log('_validateMax has:', this.hasAttribute('max'), 'Prop:', this['max'], 'el', this);
         var retval;
         if (_max) {
           if (!this.isNumber(_max)) {
@@ -160,9 +191,9 @@
           } else {
             retval = _max;
             if (parseInt(retval, 10) === this.digit) {
-                this.$.btnUp.disabled = true;
+              this.$.btnUp.disabled = true;
             } else {
-                this.$.btnUp.disabled = false;
+              this.$.btnUp.disabled = false;
             }
           }
           return retval;
@@ -172,9 +203,8 @@
         }
       },
 
-      // Validate if `min` is a number 0..9, returns actual MIN value or ''.
+      // Validate if `min` is a number 0..9, returns actual MIN value or `null`.
       _validateMin: function(_min, _oldMin) {
-        // console.log('_validateMin', _min, _oldMin, 'prop:', this.min);
         var retval;
         if (_min) {
           if (!this.isNumber(_min)) {
@@ -182,9 +212,9 @@
           } else {
             retval = _min;
             if (parseInt(retval, 10) === this.digit) {
-                this.$.btnDown.disabled = true;
+              this.$.btnDown.disabled = true;
             } else {
-                this.$.btnDown.disabled = false;
+              this.$.btnDown.disabled = false;
             }
           }
           return retval;
