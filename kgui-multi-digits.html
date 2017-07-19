@@ -347,20 +347,20 @@ console.log('_numberStr', _numberStr, this._number);
         this._core.rendering = false;
       },
 
-      // True if number attribute is a valid local decimal marked number
-      validateNumber: function(_numberStr) {
+      // True, if number attribute is a valid local decimal marked number
+      isValidLocalNumber: function(_numberStr) {
         // Writing and testing https://regex101.com/
         // TODO: No support yet for + and - sign.
-        var isValidNumber;
+        var isJSNumber = false; // JavaScript international notation '1.99'
+        var isLocalNumber = false; // Local '1,99'
 
         _numberStr = _numberStr ? _numberStr : this.number;
 
-        if (this.localDecimal === '.') {
-          isValidNumber = /^\d+(\.\d+){1}$|^\d+$/.test(_numberStr); // International - JavaScript
-        } else {
-          isValidNumber = /^\d+(,\d+){1}$|^\d+$/.test(_numberStr); // Dutch
+        isJSNumber = /^\d+(\.\d+){1}$|^\d+$/.test(_numberStr); // International - JavaScript
+        if (this.localDecimal === ',') {
+          isLocalNumber = /^\d+(,\d+){1}$|^\d+$/.test(_numberStr); // Dutch
         }
-        return isValidNumber;
+        return isLocalNumber || isJSNumber;
       },
 
       // True when correct validation of digit `format`. Example "(##)#,#".
@@ -538,7 +538,7 @@ console.log('_numberStr', _numberStr, this._number);
         if (this.validateFormat(_format)) {
           this.writeFormat(_format);
         }
-        if (this.validateNumber(_numberStr)) {
+        if (this.isValidLocalNumber(_numberStr)) {
           if (this.localDecimal === '.') {
             this._number = parseFloat(_numberStr, 10);
           } else { // Continental European
