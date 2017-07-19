@@ -1,7 +1,33 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="kgui-single-digit.html">
+
 <!--
-`kgui-multi-digits` manipulate multiple single digits
+With `kgui-multi-digits` the user can manipulate multiple single digits as one big number.
+
+This can also be a number containing a __DECIMAL MARK__, as in JavaScript Number '19.95'. Where the dot is the decimal mark.
+_This mark is localized!_ International it will be a __DOT__. But for some european countries it will be a __COMMA__.
+
+## Locatization
+
+The __DECIMAL MARK__ and _thousands divider_ is only subject to localization. 
+The implementation of `kgui-multi-digits` will work the local decimal mark.
+
+This means, the element attribute `number` does understand '19.95' as international (JavaScript) notation. 
+But also '19,95' as European support. The local info, is retrieved from the users web browser and used as number notation.
+
+## Events
+
+An overview of generated events:
+
+Event                    | Acting on, situation
+-------------------------|------------------------------------------------
+None                     | ...
+
+## Styling
+
+CSS class                    | Usage                                    | Default value
+-----------------------------|------------------------------------------|----------------------------------------
+Still under construction     | ...                                      | ...
 
 @demo demo/index-multi-digits.html
 -->
@@ -47,7 +73,7 @@
           },
         },
 
-        // Number value of type `Number`.
+        // Numeric value of the `number` attribute.
         _number: {
           type: Number,
           readOnly: true,
@@ -61,7 +87,7 @@
           reflectToAttribute: true,
         },
 
-        // Number can be with '0.0' or '0,0' decimal marker
+        // Number automaticaly converted to local decimal marker ('.' or ',').
         number: {
           type: String,
           value: '0',
@@ -118,9 +144,6 @@
           this._core.fractionCount = 0; // The number of digits after the decimal mark
           this._core.decimalCount = 0; // The number of digits before the decimal mark
           this._core.digitCount = _format.match(/#/g).length; // Expect at least 1 or more digits to create
-          this._core.decimalSeparator = this._core.decimalSeparator
-                                      ? this._core.decimalSeparator
-                                      : (1.1).toLocaleString().replace(/1/g, '');
           this._core.thousandSeparator = this._core.thousandSeparator
                                        ? this._core.thousandSeparator
                                        : (1111).toLocaleString().replace(/1/g, '');
@@ -136,13 +159,13 @@
             isThousandMark = false;
 
             switch (_format.substr(i, 1)) {
-              case this._core.decimalSeparator:
+              case this.localDecimal:
                 isDecimalMark = true; // Will be reset, in loop
                 this._core.formatDecimalMarkPosition = true; // Is needed else where in the loop
 
                 // Create an DIV element, acting as an DECIMAL MARK.
                 node = document.createElement('DIV');
-                textNode = document.createTextNode(this._core.decimalSeparator);
+                textNode = document.createTextNode(this.localDecimal);
                 node.setAttribute('id', elementID = 'token' + i);
                 node.appendChild(textNode);
                 if (optional) {
@@ -239,11 +262,11 @@
           // Build the new FORMAT sequence, digit values will be filled in later.
           this._core.symbols = buildDigitFormatList.call(this, _format);
 
-          // buildDigitFormatList() also determine `decimalSeparator`, `thousandSeparator`
+          // buildDigitFormatList() also determine `thousandSeparator`
           // Determine maximum FLOAT number.
           _format = _format.replace(/[()]/g, '');
           _format = _format.replace(new RegExp('\\' + this._core.thousandSeparator, 'g'), '');
-          _format = _format.replace(new RegExp('\\' + this._core.decimalSeparator), '.');
+          _format = _format.replace(new RegExp('\\' + this.localDecimal), '.');
           this._core.formatAsZeroNumber = _format.replace(/#/g, '0'); // Example '00000.00'
           this._core.maxNumber = parseFloat(_format.replace(/#/g, '9'), 10);
           if (this._core.formatDecimalMarkPosition) {
@@ -263,7 +286,7 @@
         var idx;
         var zeroStr = ''; // Doesn't have decimal mark. Number value 1.5 is formatted as '0150'
 
-console.log('writeNumberAsDigits() digits show string `', this._getDigitFloatStr(), '` this._number:', this._number, '=', parseFloat(this._getDigitFloatStr(), 10));
+        // console.log('writeNumberAsDigits() digits show string `', this._getDigitFloatStr(), '` this._number:', this._number, '=', parseFloat(this._getDigitFloatStr(), 10));
         if (parseFloat(this._getDigitFloatStr(), 10) === this._number) {
           // Abort DIGIT DISPLAY is the same the the MULTI DIGITS number
           return;
@@ -286,7 +309,7 @@ console.log('writeNumberAsDigits() digits show string `', this._getDigitFloatStr
           _numberStr = this._number.toString(); // Is JavaScript decimal mark number, like in '0.0'
           idx = -1;
         }
-console.log('_numberStr:', _numberStr, this._number);
+        // console.log('_numberStr:', _numberStr, this._number);
 
 /*
         _numberStr = this._number.toString(); // Is JavaScript decimal mark number, like in '0.0'
@@ -397,7 +420,7 @@ console.log('_numberStr', _numberStr, this._number);
         // For a number of '1.23', clicking the '2' gives factor '0.1'.
         // For a number of '1.23', clicking the '1' gives factor '1'.
         factor = 1 / Math.pow(10, floatPos) * Math.pow(10, digitID);
-console.log('_digitBoundaryCrossed() float A:', float);
+        // console.log('_digitBoundaryCrossed() float A:', float);
         // detail.new digit value vs. detail.old and previous value.
         float = float + factor * 10 * e.detail.increment;
         float = float.toFixed(this._core.fractionCount);
@@ -410,14 +433,14 @@ console.log('_digitBoundaryCrossed() float A:', float);
         }
 
         this._set_number(parseFloat(float, 10));
-console.log('_digitBoundaryCrossed() float B:', float, this._number, 'this.number:', this.number);
+        // console.log('_digitBoundaryCrossed() float B:', float, this._number, 'this.number:', this.number);
         // Changing `this.number`, will invoke _checkSingleDigitChanged()
         if (this.localDecimal === '.') {
           this.number = parseFloat(float, 10).toString();
-console.log('_digitBoundaryCrossed(), float Cjs:', this._number, 'this.number:', this.number);
+          // console.log('_digitBoundaryCrossed(), float Cjs:', this._number, 'this.number:', this.number);
         } else {
           this.number = parseFloat(float, 10).toString().replace('.', ',');
-console.log('_digitBoundaryCrossed(), float Ceu:', this._number, 'this.number:', this.number);
+          // console.log('_digitBoundaryCrossed(), float Ceu:', this._number, 'this.number:', this.number);
         }
 
         this.writeNumberAsDigits(); // New FLOAT number calculated, write complete number
@@ -430,7 +453,7 @@ console.log('_digitBoundaryCrossed(), float Ceu:', this._number, 'this.number:',
         var newFloat = parseFloat(this._getDigitFloatStr(), 10);
         var optionActive;
         var symbol;
-console.log('_checkSingleDigitChanged(), clicked on digit id:', e.target.id, 'digit:', e.target.digit);
+        // console.log('_checkSingleDigitChanged(), clicked on digit id:', e.target.id, 'digit:', e.target.digit);
         if (this._core.maxNumber === newFloat) {
           // MAXIMUM number displayed, CAN'T GO HIGHER
           this._core.symbols.forEach(function(symbol) {
@@ -483,7 +506,7 @@ console.log('_checkSingleDigitChanged(), clicked on digit id:', e.target.id, 'di
         }
 
         newFloat = newFloat.toFixed(this._core.fractionCount);
-console.log('_checkSingleDigitChanged() newFloat:', newFloat);
+        // console.log('_checkSingleDigitChanged() newFloat:', newFloat);
         this._set_number(parseFloat(newFloat, 10));
         if (this.localDecimal === '.') {
           this.number = parseFloat(newFloat, 10).toString();
@@ -491,7 +514,7 @@ console.log('_checkSingleDigitChanged() newFloat:', newFloat);
           this.number = parseFloat(newFloat, 10).toString().replace('.', ',');
         }
 
-console.log('_checkSingleDigitChanged() - new visible number:', newFloat, this._number, this.number);
+        // console.log('_checkSingleDigitChanged() - new visible number:', newFloat, this._number, this.number);
         // this.writeNumberAsDigits(); // New FLOAT number calculated, write complete number
       },
 
