@@ -332,7 +332,7 @@ console.log('_numberStr', _numberStr, this._number);
         // When digit number is set. The digit will automatically resond with an 'digit-changed' EVENT.
         // Invoking this function again, creating and endless loop. This process is interupted, while
         // setting this '_core.rendering' FLAG.
-        this._core.rendering = true;
+        this._core.rendering = true; // TODO: Do we need this?
         idx = zeroStr.length - 1;
         // Walk through digits, from RIGHT:0 to LEFT:#
         for (i = 0; i < this._core.symbols.length; i += 1) {
@@ -500,6 +500,8 @@ console.log('_numberStr', _numberStr, this._number);
             } else {
               if (symbol.isOptional && optionActive) {
                 symbol.node.classList.add('symbol__invisible');
+              } else {
+                symbol.node.classList.remove('symbol__invisible');
               }
             }
           }
@@ -535,22 +537,21 @@ console.log('_numberStr', _numberStr, this._number);
 
       // Update digit display with input from `format` and `number`
       _updateDisplay: function(_format, _numberStr) {
+        // this._set'PropertyAsReadOnly'() - property is '_number'.
+        // https://www.polymer-project.org/1.0/docs/devguide/properties#read-only
         if (this.validateFormat(_format)) {
           this.writeFormat(_format);
         }
         if (this.isValidLocalNumber(_numberStr)) {
           if (this.localDecimal === '.') {
-            this._number = parseFloat(_numberStr, 10);
+            this._set_number(parseFloat(_numberStr, 10));
           } else { // Continental European
-            // _numberStr = _numberStr.replace(',', '.');
-            // https://www.polymer-project.org/1.0/docs/devguide/properties#read-only
             this._set_number(parseFloat(_numberStr.replace(',', '.'), 10));
           }
         } else {
           this._set_number(0);
           this.number = '0';
         }
-        // console.log('_updateDisplay()', _format, _numberStr, this.number, this._number);
         this.writeNumberAsDigits();
       },
 
