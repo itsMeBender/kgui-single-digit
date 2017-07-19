@@ -172,16 +172,16 @@
 
         // -----------------------------------------------------------------------------------
         // Functionality, validations.
-        // _validateDigit() - validates digit and return digit or when invalid, the previous valid digit
+        // _changeDisplay() - validates digit and return digit or when invalid, the previous valid digit
         //                    When digit is valid, MINIMUM and MAXIMUM values are matched and buttons
         //                    activated or deactivated.  
         // -----------------------------------------------------------------------------------
 
-        test('C01 - Function _validateDigit(), valid digit.', function() {
+        test('C01 - Function _changeDisplay(), valid digit.', function() {
           // Digit is by default '0'
           // MINIMUM and MAXIMUM values not given (null, undefined)
           // Chech default behavior
-          assert.equal(element._validateDigit(0, 9), 0); // 0:new digit, 9:(previous) old digit
+          assert.equal(element._changeDisplay(0, 9), 0); // 0:new digit, 9:(previous) old digit
           assert.equal(buttons[UP].disabled, false);
           assert.equal(buttons[DOWN].disabled, false);
 
@@ -193,17 +193,17 @@
           assert.equal(buttons[DOWN].disabled, false);
 
           // Value in between
-          assert.equal(element._validateDigit(5, 9), 5);
+          assert.equal(element._changeDisplay(5, 9), 5);
           assert.equal(buttons[UP].disabled, false);
           assert.equal(buttons[DOWN].disabled, false);
 
           // Value maximum
-          assert.equal(element._validateDigit(6, 9), 6);
+          assert.equal(element._changeDisplay(6, 9), 6);
           assert.equal(buttons[UP].disabled, true);
           assert.equal(buttons[DOWN].disabled, false);
 
           // Value minimum
-          assert.equal(element._validateDigit(4, 9), 4);
+          assert.equal(element._changeDisplay(4, 9), 4);
           assert.equal(buttons[UP].disabled, false);
           assert.equal(buttons[DOWN].disabled, true);
 
@@ -216,20 +216,20 @@
           assert.equal(buttons[DOWN].disabled, false);
         });
 
-        test('C02 - Function _validateDigit(), invalid digit, return previous', function() {
-          assert.equal(element._validateDigit('1t3', 3), 3); // unacceptable characters
+        test('C02 - Function _changeDisplay(), invalid digit, return previous', function() {
+          assert.equal(element._changeDisplay('1t3', 3), 3); // unacceptable characters
           assert.equal(element.digit, 3);
 
-          assert.equal(element._validateDigit('123', 4), 4); // unacceptable characters, too many
+          assert.equal(element._changeDisplay('123', 4), 4); // unacceptable characters, too many
           assert.equal(element.digit, 4);
         });
 
-        test('C03 - Function _validateDigit(), invalid property `digit`, reset to old.', function() {
+        test('C03 - Function _changeDisplay(), invalid property `digit`, reset to old.', function() {
           // Change default value of '0' into ...
           element.setAttribute('digit', 6);
           assert.equal(element.digit, 6);
 
-          assert.equal(element._validateDigit('#', 2), 2); // unacceptable characters
+          assert.equal(element._changeDisplay('#', 2), 2); // unacceptable characters
           // After invalid digit, return to previous value. Not 6 but 2 (last validation input)
           assert.equal(element.digit, 2);
           assert.equal(element.getAttribute('digit'), 2);

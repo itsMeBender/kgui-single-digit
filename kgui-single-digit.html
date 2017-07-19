@@ -137,7 +137,7 @@ Still under construction     | ...                                      | ...
           type: Number,
           value: 0,
           notify: true,
-          observer: '_validateDigit',
+          observer: '_changeDisplay',
           reflectToAttribute: true,
         },
 
@@ -161,7 +161,7 @@ Still under construction     | ...                                      | ...
       },
 
       // Validate if `digit` is a number 0..9, returns actual value.
-      _validateDigit: function(_digit, _oldDigit) {
+      _changeDisplay: function(_digit, _oldDigit) {
         var retval;
 
         if (!this.isNumber(_digit)) {
