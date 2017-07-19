@@ -17,11 +17,7 @@ But also '19,95' as European support. The local info, is retrieved from the user
 
 ## Events
 
-An overview of generated events:
-
-Event                    | Acting on, situation
--------------------------|------------------------------------------------
-None                     | ...
+For an overview of related events, see documentation `kgui-single-digit`.
 
 ## Styling
 
@@ -335,7 +331,6 @@ Still under construction     | ...                                      | ...
 
       // A digit has crossed the number boundary, like from 9 to 0.
       _digitBoundaryCrossed: function(e) {
-        // console.log('_digitBoundaryCrossed()');
         var digitID = parseInt(e.target.id.substr(5), 10);
         var factor;
         var float = parseFloat(this._getDigitFloatStr(), 10); // 000.00
@@ -350,7 +345,7 @@ Still under construction     | ...                                      | ...
         // For a number of '1.23', clicking the '2' gives factor '0.1'.
         // For a number of '1.23', clicking the '1' gives factor '1'.
         factor = 1 / Math.pow(10, floatPos) * Math.pow(10, digitID);
-        // console.log('_digitBoundaryCrossed() float A:', float);
+
         // detail.new digit value vs. detail.old and previous value.
         float = float + factor * 10 * e.detail.increment;
         float = float.toFixed(this._core.fractionCount);
@@ -363,14 +358,11 @@ Still under construction     | ...                                      | ...
         }
 
         this._set_number(parseFloat(float, 10));
-        // console.log('_digitBoundaryCrossed() float B:', float, this._number, 'this.number:', this.number);
         // Changing `this.number`, will invoke _checkSingleDigitChanged()
         if (this.localDecimal === '.') {
           this.number = parseFloat(float, 10).toString();
-          // console.log('_digitBoundaryCrossed(), float Cjs:', this._number, 'this.number:', this.number);
         } else {
           this.number = parseFloat(float, 10).toString().replace('.', ',');
-          // console.log('_digitBoundaryCrossed(), float Ceu:', this._number, 'this.number:', this.number);
         }
 
         this._writeNumberAsDigits(); // New FLOAT number calculated, write complete number
@@ -383,7 +375,7 @@ Still under construction     | ...                                      | ...
         var newFloat = parseFloat(this._getDigitFloatStr(), 10);
         var optionActive;
         var symbol;
-        // console.log('_checkSingleDigitChanged(), clicked on digit id:', e.target.id, 'digit:', e.target.digit);
+
         if (this._core.maxNumber === newFloat) {
           // MAXIMUM number displayed, CAN'T GO HIGHER
           this._core.symbols.forEach(function(symbol) {
@@ -438,19 +430,16 @@ Still under construction     | ...                                      | ...
         }
 
         newFloat = newFloat.toFixed(this._core.fractionCount);
-        // console.log('_checkSingleDigitChanged() newFloat:', newFloat);
+
         this._set_number(parseFloat(newFloat, 10));
         if (this.localDecimal === '.') {
           this.number = parseFloat(newFloat, 10).toString();
         } else {
           this.number = parseFloat(newFloat, 10).toString().replace('.', ',');
         }
-
-        // console.log('_checkSingleDigitChanged() - new visible number:', newFloat, this._number, this.number);
-        // this._writeNumberAsDigits(); // New FLOAT number calculated, write complete number
       },
 
-      // Get the digits number as FLOAT string
+      // Get the digits number as FLOAT string, also the invisible parts
       _getDigitFloatStr: function() {
         var floatStr = '';
 
@@ -495,7 +484,6 @@ Still under construction     | ...                                      | ...
         var idx;
         var zeroStr = ''; // Doesn't have decimal mark. Number value 1.5 is formatted as '0150'
 
-        // console.log('_writeNumberAsDigits() digits show string `', this._getDigitFloatStr(), '` this._number:', this._number, '=', parseFloat(this._getDigitFloatStr(), 10));
         if (parseFloat(this._getDigitFloatStr(), 10) === this._number) {
           // Abort DIGIT DISPLAY is the same the the MULTI DIGITS number
           return;
