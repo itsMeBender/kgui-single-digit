@@ -525,8 +525,16 @@
         // Digit '1' will be '0', to show '09' as total number.
         // -----------------------------------------------------------------------------------
 
-        test('D01 - Test click behavior (#)#, with value 9', function() {
+        test('D01 - Test click behavior (#)#, with value 9', function(done) {
+          var eventBoundaryCounter = 0;
+
           // Prepare
+          element.addEventListener('digit-boundary-crossed', function(e) {
+            eventBoundaryCounter += 1;
+            if (eventBoundaryCounter === 2) {
+              done();
+            }
+          });
           if (decimalSeparator === ',') { // Continental European
             element.setAttribute('format', '(#)#');
           } else {
@@ -541,7 +549,7 @@
           assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), true);
 
           // Test mouse click on + #9
-          eventFire(element.$$('#digit0').$.btnUp, 'click');
+          eventFire(element.$$('#digit0').$.btnUp, 'click'); // FIRE EVENT 'digit-boundary-crossed'
           assert.equal(element.$$('#digit0').digit, '0');
           assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
           assert.equal(element.$$('#digit1').digit, '1');
@@ -550,7 +558,7 @@
           assert.equal(element.getAttribute('number'), '10');
 
           // Test mouse click on - #0
-          eventFire(element.$$('#digit0').$.btnDown, 'click');
+          eventFire(element.$$('#digit0').$.btnDown, 'click'); // FIRE EVENT 'digit-boundary-crossed'
           assert.equal(element.$$('#digit0').digit, '9');
           assert.equal(element.$$('#digit0').classList.contains('symbol__invisible'), false);
           assert.equal(element.$$('#digit1').digit, '0');
@@ -598,8 +606,16 @@
           assert.equal(element.$$('#digit1').$.btnUp.disabled, true);
         });
 
-        test('D02 - Test click behavior on #####, with value 9999', function() {
+        test('D02 - Test click behavior on #####, with value 9999', function(done) {
+          var eventBoundaryCounter = 0;
+
           // Prepare
+          element.addEventListener('digit-boundary-crossed', function() {
+            eventBoundaryCounter += 1;
+            if (eventBoundaryCounter === 3) {
+              done();
+            }
+          });
           element.setAttribute('format', '#####');
           element.setAttribute('number', '9999'); // On display just '9'.
 
@@ -616,7 +632,7 @@
           assert.equal(element.$$('#digit1').classList.contains('symbol__invisible'), false);
 
           // Test mouse click on + #9##
-          eventFire(element.$$('#digit2').$.btnUp, 'click');
+          eventFire(element.$$('#digit2').$.btnUp, 'click'); // FIRE EVENT 'digit-boundary-crossed'
           assert.equal(element.$$('#digit0').digit, '9');
           assert.equal(element.$$('#digit1').digit, '9');
           assert.equal(element.$$('#digit2').digit, '0');
@@ -624,7 +640,7 @@
           assert.equal(element.$$('#digit4').digit, '1');
 
           // Test mouse click on + ####9
-          eventFire(element.$$('#digit0').$.btnUp, 'click');
+          eventFire(element.$$('#digit0').$.btnUp, 'click'); // FIRE EVENT 'digit-boundary-crossed'
           assert.equal(element.$$('#digit0').digit, '0');
           assert.equal(element.$$('#digit1').digit, '0');
           assert.equal(element.$$('#digit2').digit, '1');
@@ -647,7 +663,7 @@
           assert.equal(element.$$('#digit4').getAttribute('min'), '');
 
           // Test mouse click on - -####, value = '00100'.
-          eventFire(element.$$('#digit4').$.btnDown, 'click');
+          eventFire(element.$$('#digit4').$.btnDown, 'click'); // FIRE EVENT 'digit-boundary-crossed'
           assert.equal(element.$$('#digit0').digit, '0');
           assert.equal(element.$$('#digit1').digit, '0');
           assert.equal(element.$$('#digit2').digit, '0');
@@ -659,8 +675,123 @@
           assert.equal(element.$$('#digit3').getAttribute('min'), 0);
           assert.equal(element.$$('#digit4').getAttribute('min'), 0);
         });
-      });
 
+        // -----------------------------------------------------------------------------------
+        // Function writeFormat(formtString)
+        // Writes the format layout of digits, DECIMAL MARK and other dividers.
+        // Without using actial digit numbers. It uses the default 0.
+        // -----------------------------------------------------------------------------------
+
+        test('E01 - Function writeFormat(formatString)', function() {
+          // Check default
+          assert.equal(element.format, '(##)#');
+          // Digit ID's from right to left, as '210'
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit2').digit, '0');
+          assert.equal(element.$$('#digit3'), null); // Does not exits
+
+          // Prepare 6 digits right to left '5.4.3,210
+          if (decimalSeparator === ',') { // Continental European
+            element.writeFormat('(#.#).#,###');
+          } else {
+            element.writeFormat('(#,#),#.###');
+          }
+
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit2').digit, '0');
+          assert.equal(element.$$('#digit3').digit, '0');
+          assert.equal(element.$$('#digit4').digit, '0');
+          assert.equal(element.$$('#digit5').digit, '0');
+          assert.equal(element.$$('#digit6'), null); // Does not exits
+
+          assert.equal(element.$$('#token2').classList.contains('digit--thousand'), true);
+          assert.equal(element.$$('#token5').classList.contains('digit--thousand'), true);
+          assert.equal(element.$$('#token7').classList.contains('digit--decimal'), true);
+
+          assert.equal(element.$$('#token2').classList.contains('symbol__invisible'), true);
+          assert.equal(element.$$('#token5').classList.contains('symbol__invisible'), false);
+          assert.equal(element.$$('#token7').classList.contains('symbol__invisible'), false);
+        });
+
+        // -----------------------------------------------------------------------------------
+        // Function _writeNumberAsDigits()
+        // The property element._number (of type Number) is used as input.
+        // -----------------------------------------------------------------------------------
+
+        test('F01 - Function _writeNumberAsDigits()', function() {
+          // Check default
+          assert.equal(element.format, '(##)#');
+          assert.equal(element._number, 0);
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit2').digit, '0');
+          assert.equal(element.$$('#digit3'), null); // Does not exits
+
+          // Change the number
+          element.number = '987';
+          assert.equal(element._number, 987);
+          // In real, changing property element._number, already invoked _writeNumberAsDigits()
+          assert.equal(element.$$('#digit0').digit, '7');
+          assert.equal(element.$$('#digit1').digit, '8');
+          assert.equal(element.$$('#digit2').digit, '9');
+          assert.equal(element.$$('#digit3'), null); // Does not exits
+
+          // This call has no use, but we check it still.
+          element._writeNumberAsDigits();
+          assert.equal(element.$$('#digit0').digit, '7');
+          assert.equal(element.$$('#digit1').digit, '8');
+          assert.equal(element.$$('#digit2').digit, '9');
+          assert.equal(element.$$('#digit3'), null); // Does not exits
+        });
+
+        // -----------------------------------------------------------------------------------
+        // Function _getDigitFloatStr(), get the multi digits number value as a string.
+        // -----------------------------------------------------------------------------------
+
+        test('F01 - Function _getDigitFloatStr()', function() {
+          // Default situation
+          assert.equal(element._number, 0);
+          assert.equal(element._getDigitFloatStr(), '000');
+          // Test
+          element.number = '12';
+          assert.equal(element._getDigitFloatStr(), '012');
+        });
+
+        test('F02 - Function _getDigitFloatStr() in combination with diverent formats', function() {
+          // Prepare
+          if (decimalSeparator === ',') { // Continental European
+            element.setAttribute('format', '###,##');
+          } else {
+            element.setAttribute('format', '###.##');
+          }
+
+          // Test
+          element.number = '12.95';
+          assert.equal(element._getDigitFloatStr(), '012.95');
+          assert.equal(element._number, 12.95);
+
+          // Test
+          element.number = '4.9';
+          assert.equal(element._getDigitFloatStr(), '004.90');
+          assert.equal(element._number, 4.9);
+        });
+
+        // -----------------------------------------------------------------------------------
+        // Function _digitBoundaryCrossed(), is tested indirectly. Because function is invoked
+        // by EVENT 'digit-boundary-crossed', see test 'D##'.
+        // -----------------------------------------------------------------------------------
+
+        // -----------------------------------------------------------------------------------
+        // Function _checkSingleDigitChanged(), is tested indirectly. Because function is invoked
+        // by EVENT 'digit-changed', see test 'D##'.
+        // -----------------------------------------------------------------------------------
+
+        // -----------------------------------------------------------------------------------
+        // Function _updateDisplay(), is invoked when changing attribute (property) 'number' or 'format'.
+        // -----------------------------------------------------------------------------------
+      });
     </script>
   </body>
 </html>
