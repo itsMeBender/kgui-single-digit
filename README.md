@@ -15,6 +15,7 @@
 -->
 ```html
 <kgui-single-digit></kgui-single-digit>
+<kgui-multi-digits></kgui-multi-digits>
 ```
 
 # Introduction
@@ -36,16 +37,10 @@ There is no automatic support for the thousand divider. Officially it is a _SPAC
 # Specifications
 
 * Single digit manipulation.
-* Multiple digits manipulation, using `\<kgui-multi-digits\>.`
+* Multiple digits manipulation, using `<kgui-multi-digits number="123">`.
 * Localization of the decimal-mark.
 * Allow large number formatting, using (thousand) dividers.
 * Number format also defines maximum size of the number. As in the format `###`, with number range from 0 .. 999.
 * Currently only positive numbers are supported!
 
-## Future enhancements
-
-* Decimals (I'm working on this (july'17).
-* Negative numbers.
-* Drag /  swipe to change numbers.
-* Animation.
-* WAI support.
+See also wiki.
