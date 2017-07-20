@@ -76,7 +76,7 @@
 
           assert.equal(element.localDecimal, decimalSeparator);
 
-          // Check _core data, the number of symbols
+          // Check _core data, the number of digits (not symbols, 4 in this example)
           assert.equal(element._core.digitCount, 3);
 
           if (decimalSeparator === ',') { // Continental European
@@ -677,12 +677,12 @@
         });
 
         // -----------------------------------------------------------------------------------
-        // Function writeFormat(formtString)
+        // Function _paintFormat(formtString)
         // Writes the format layout of digits, DECIMAL MARK and other dividers.
         // Without using actial digit numbers. It uses the default 0.
         // -----------------------------------------------------------------------------------
 
-        test('E01 - Function writeFormat(formatString)', function() {
+        test('E01 - Function _paintFormat(formatString)', function() {
           // Check default
           assert.equal(element.format, '(##)#');
           // Digit ID's from right to left, as '210'
@@ -693,9 +693,9 @@
 
           // Prepare 6 digits right to left '5.4.3,210
           if (decimalSeparator === ',') { // Continental European
-            element.writeFormat('(#.#).#,###');
+            element._paintFormat('(#.#).#,###');
           } else {
-            element.writeFormat('(#,#),#.###');
+            element._paintFormat('(#,#),#.###');
           }
 
           assert.equal(element.$$('#digit0').digit, '0');
@@ -789,7 +789,7 @@
         // -----------------------------------------------------------------------------------
 
         // -----------------------------------------------------------------------------------
-        // Function _updateDisplay(), is invoked when changing attribute (property) 'number' or 'format'.
+        // Function _paintNumber(), is invoked when changing attribute (property) 'number' or 'format'.
         // -----------------------------------------------------------------------------------
       });
     </script>
