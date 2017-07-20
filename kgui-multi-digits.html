@@ -81,6 +81,7 @@ Still under construction     | ...                                      | ...
           type: String,
           value: '(##)#',
           reflectToAttribute: true,
+          observer: '_paintFormat',
         },
 
         // Number automaticaly converted to local decimal marker ('.' or ',').
@@ -89,6 +90,7 @@ Still under construction     | ...                                      | ...
           value: '0',
           notify: true,
           reflectToAttribute: true,
+          observer: '_paintNumber',
         },
 
         // Local decimal separator DOT or COMMA
@@ -100,17 +102,11 @@ Still under construction     | ...                                      | ...
         },
       },
 
-      observers: [
-        '_updateDisplay(format, number)',
-      ],
-
       // Build the number structure according to validated `format` layout.
-      writeFormat: function(_format) {
+      _paintFormat: function(_format, _oldFormat) {
         // The 'format' string is important because, it shows the maximum size of digits.
         // And which digits are always visible, at least with a '0'.
-        // The '(#...)', part is hidden when the number needs it. The other part is always visible.
-        // The number (float) is centered around the localized decimal mark, a '.' or ','
-        _format = _format ? _format : this.format;
+        // The '(#...)' part is hidden when the number does not need it. The other part is always visible.
 
         /**
          * Interpretate a `_format` string on
@@ -241,8 +237,13 @@ Still under construction     | ...                                      | ...
           return formatLst;
         } // End function buildDigitFormatList()
 
+        // Has format been deleted, using removeAttribute('format')
+        if (_format === null) {
+          // Attribute is deleted, fallback to previour or default
+          this.format = _format = '(##)#';
+        }
         // Has format changed?
-        if (_format !== this._core.format) {
+        if (_format !== _oldFormat && this.validateFormat(_format)) {
           // Yes, Create new format as specified
           this._core.format = _format;
           this._core.domAPI = this._core.domAPI ? this._core.domAPI : Polymer.dom(this.$.digits);
@@ -305,7 +306,7 @@ Still under construction     | ...                                      | ...
 
         // Always need a format, evenn if user has used (by accident0 removeAttribute()
         if (!_format) {
-          this.format = '(##)#'; // This will activate _updateDisplay(format, number)
+          this.format = '(##)#'; // This will activate _paintNumber(format, number)
           return true;
         }
 
@@ -455,12 +456,13 @@ Still under construction     | ...                                      | ...
       },
 
       // Update digit display with input from `format` and `number`
-      _updateDisplay: function(_format, _numberStr) {
+      _paintNumber: function(_numberStr, _oldNumberStr) {
         // this._set'PropertyAsReadOnly'() - property is '_number'.
         // https://www.polymer-project.org/1.0/docs/devguide/properties#read-only
-        if (this.validateFormat(_format)) {
-          this.writeFormat(_format);
+        if (this._core.symbols.length === 0 ) {
+          this._paintFormat(this.format, null); // force paint
         }
+
         if (this.isValidLocalNumber(_numberStr)) {
           if (this.localDecimal === '.') {
             this._set_number(parseFloat(_numberStr, 10));
@@ -473,7 +475,6 @@ Still under construction     | ...                                      | ...
         }
         this._writeNumberAsDigits();
       },
-
 
       // Attribute `number` changed, update digits.
       _writeNumberAsDigits: function() {
