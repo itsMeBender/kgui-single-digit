@@ -62,8 +62,8 @@ Still under construction     | ...                                      | ...
 
         // Act as a SingleTon to keep `multi digits` data in synq.
         _core: {
-          type: Object,
           readOnly: true,
+          type: Object,
           value: function() {
             return {digits: [], format: null};
           },
@@ -71,35 +71,42 @@ Still under construction     | ...                                      | ...
 
         // Numeric value of the `number` attribute.
         _number: {
-          type: Number,
           readOnly: true,
+          type: Number,
           value: 0,
         },
 
         // Digits format and number range (0 - 9999.9). Under influence of local decimal marker.
         format: {
+          notify: true,
+          observer: '_paintFormat',
+          reflectToAttribute: true,
           type: String,
           value: '(##)#',
-          reflectToAttribute: true,
-          observer: '_paintFormat',
         },
 
         // Number automaticaly converted to local decimal marker ('.' or ',').
         number: {
+          notify: true,
+          observer: '_paintNumber',
+          reflectToAttribute: true,
           type: String,
           value: '0',
-          notify: true,
-          reflectToAttribute: true,
-          observer: '_paintNumber',
         },
 
         // Local decimal separator DOT or COMMA
         localDecimal: {
-          type: String,
-          value: (1.1).toLocaleString().replace(/1/g, ''),
+          computed: '_computeLocalDecimal(format)',
+          notify: true,
           readOnly: true,
           reflectToAttribute: true,
+          type: String,
         },
+      },
+
+      // Returns the local decimal mark, a `dot` or `comma`.
+      _computeLocalDecimal: function() {
+          return (1.1).toLocaleString().replace(/1/g, '');
       },
 
       // Build the number structure according to validated `format` layout.
@@ -345,7 +352,11 @@ Still under construction     | ...                                      | ...
         // For a number of '1.23', clicking the '3' gives factor '0.01'.
         // For a number of '1.23', clicking the '2' gives factor '0.1'.
         // For a number of '1.23', clicking the '1' gives factor '1'.
-        factor = 1 / Math.pow(10, floatPos) * Math.pow(10, digitID);
+        if (floatPos) {
+          factor = 1 / Math.pow(10, this._core.digitCount - floatPos) * Math.pow(10, digitID);
+        } else {
+          factor = Math.pow(10, digitID);
+        }
 
         // detail.new digit value vs. detail.old and previous value.
         float = float + factor * 10 * e.detail.increment;

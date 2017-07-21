@@ -676,6 +676,56 @@
           assert.equal(element.$$('#digit4').getAttribute('min'), 0);
         });
 
+        test('D03 - Test click behavior with one fraction ####.#', function() {
+          // Prepare fractions
+          if (decimalSeparator === ',') { // Continental European
+            element._paintFormat('####,#');
+            element.setAttribute('number', '999,9'); //
+          } else {
+            element._paintFormat('####.#');
+            element.setAttribute('number', '999.9'); //
+          }
+          assert.equal(element.$$('#digit0').digit, '9');
+          assert.equal(element.$$('#digit1').digit, '9');
+          assert.equal(element.$$('#digit2').digit, '9');
+          assert.equal(element.$$('#digit3').digit, '9');
+          assert.equal(element.$$('#digit4').digit, '0');
+
+          // Test mouse click on
+          eventFire(element.$$('#digit0').$.btnUp, 'click');
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit2').digit, '0');
+          assert.equal(element.$$('#digit3').digit, '0');
+          assert.equal(element.$$('#digit4').digit, '1');
+          assert.equal(element._number, 1000);
+        });
+
+        test('D04 - Test click behavior with four fractions #.####', function() {
+          // Prepare fractions
+          if (decimalSeparator === ',') { // Continental European
+            element._paintFormat('#,####');
+            element.setAttribute('number', '0,9999');
+          } else {
+            element._paintFormat('#.####');
+            element.setAttribute('number', '0.9999');
+          }
+          assert.equal(element.$$('#digit0').digit, '9');
+          assert.equal(element.$$('#digit1').digit, '9');
+          assert.equal(element.$$('#digit2').digit, '9');
+          assert.equal(element.$$('#digit3').digit, '9');
+          assert.equal(element.$$('#digit4').digit, '0');
+
+          // Test mouse click on
+          eventFire(element.$$('#digit0').$.btnUp, 'click');
+          assert.equal(element.$$('#digit0').digit, '0');
+          assert.equal(element.$$('#digit1').digit, '0');
+          assert.equal(element.$$('#digit2').digit, '0');
+          assert.equal(element.$$('#digit3').digit, '0');
+          assert.equal(element.$$('#digit4').digit, '1');
+          assert.equal(element._number, 1);
+        });
+
         // -----------------------------------------------------------------------------------
         // Function _paintFormat(formtString)
         // Writes the format layout of digits, DECIMAL MARK and other dividers.
