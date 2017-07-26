@@ -68,10 +68,20 @@
 
     <div class="vertical-section-container centered">
       <h3>Large number</h3>
-      <p>Using dividers for thousants. Use of this option is localized.</p>
+      <p>Using dividers for thousants. Use of this option is localized. ISO-Norm states a SPACE as thousand divider. But it can be anything.</p>
       <demo-snippet>
         <template>
           <kgui-multi-digits format="##.###.###" number="12345678"></kgui-multi-digits>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <div class="vertical-section-container centered">
+      <h3>A divider</h3>
+      <p>Time</p>
+      <demo-snippet>
+        <template>
+          <kgui-multi-digits format="##:##" number="1234"></kgui-multi-digits>
         </template>
       </demo-snippet>
     </div>
