@@ -25,7 +25,7 @@ CSS class                    | Usage                                    | Defaul
 -----------------------------|------------------------------------------|----------------------------------------
 Still under construction     | ...                                      | ...
 
-@demo demo/index-multi-digits.html
+@demo demo/multi-digits.html
 -->
 
 <dom-module id="kgui-multi-digits">
@@ -109,17 +109,18 @@ Still under construction     | ...                                      | ...
           return (1.1).toLocaleString().replace(/1/g, '');
       },
 
-      // Build the number structure according to validated `format` layout.
+      // Build the number structure according to `format` layout.
       _paintFormat: function(_format, _oldFormat) {
-        // The 'format' string is important because, it shows the maximum size of digits.
+        // The 'format' string is important because, it shows the maximum amount of digits.
         // And which digits are always visible, at least with a '0'.
-        // The '(#...)' part is hidden when the number does not need it. The other part is always visible.
+        // The '(#...)' part is hidden when the number does not need it (digit is '0').
+        // The other part (the right side of ')') is always visible.
 
         /**
          * Interpretate a `_format` string on
          *  - '#', a single digit
-         *  - ','|'.'- a divider
-         *  - TODO: SPACE as divider is ISO norm
+         *  - ','|'.'- is the DECIMAL MARK, depending on LOCAL
+         *  - Everything else, is considered as a divider (SPACE divider is ISO norm)
          * Example "(##)#.###,##" is a number with floating point divider at ','.
          * Maximum number range '999.999,99', initial visible as '0.000,00'.
          * @param {String} _format of the number
@@ -132,6 +133,7 @@ Still under construction     | ...                                      | ...
           var formatLength = _format.length;
           var i;
           var isDecimalMark;
+          var isDividerMark;
           var isThousandMark;
           var node;
           var optional = false; // Are digits part of the optional part of the form, as in '(###)'.
@@ -143,23 +145,25 @@ Still under construction     | ...                                      | ...
           this._core.fractionCount = 0; // The number of digits after the decimal mark
           this._core.decimalCount = 0; // The number of digits before the decimal mark
           this._core.digitCount = _format.match(/#/g).length; // Expect at least 1 or more digits to create
-          this._core.thousandSeparator = this._core.thousandSeparator
+          this._core.thousandSeparator = this._core.thousandSeparator // TODO: Do we need this?
                                        ? this._core.thousandSeparator
                                        : (1111).toLocaleString().replace(/1/g, '');
 
           digitCount = this._core.digitCount;
 
-          // Determine LOCAL decimal '.'|',' separator sign
+          // Determine LOCAL decimal '.'|',' separator MARK
           // First build the digits sequence, as instructed by the format string.
           // (##)#,###.## ~ whereby the '(##)' is the optional (hidden) part.
 
           for (i = 0; i < formatLength; i += 1) {
             isDecimalMark = false;
+            isDividerMark = false;
             isThousandMark = false;
 
             switch (_format.substr(i, 1)) {
               case this.localDecimal:
                 isDecimalMark = true; // Will be reset, in loop
+                isDividerMark = true;
                 this._core.formatDecimalMarkPosition = true; // Is needed else where in the loop
 
                 // Create an DIV element, acting as an DECIMAL MARK.
@@ -176,9 +180,10 @@ Still under construction     | ...                                      | ...
                 break;
 
               case this._core.thousandSeparator:
+                // TODO: there is NO CHECK, if this thousand divider is on the correct place!
+                isDividerMark = true;
                 isThousandMark = true;
-
-                // Create an DIV element, acting as an THOUSANTS DIVIDER.
+                // Create an DIV element, acting as an THOUSANDS DIVIDER.
                 node = document.createElement('DIV');
                 textNode = document.createTextNode(this._core.thousandSeparator);
                 node.setAttribute('id', elementID = 'token' + i);
@@ -199,7 +204,7 @@ Still under construction     | ...                                      | ...
                 optional = false; // Create visible 'kgui-single-digit' elements
                 break;
 
-              default: // '#' token
+              case '#':
                 if (this._core.formatDecimalMarkPosition) {
                   this._core.fractionCount += 1; // The number of digits after the decimal mark
                 } else {
@@ -219,6 +224,21 @@ Still under construction     | ...                                      | ...
                 // https://www.polymer-project.org/1.0/docs/devguide/events
                 this.listen(node, 'digit-boundary-crossed', '_digitBoundaryCrossed');
                 this.listen(node, 'digit-changed', '_checkSingleDigitChanged');
+                break;
+
+              default: // Just a divider
+                isDividerMark = true;
+                // Create an DIV element, acting as an DIVIDER.
+                node = document.createElement('DIV');
+                textNode = document.createTextNode(_format.substr(i, 1));
+                node.setAttribute('id', elementID = 'token' + i);
+                node.appendChild(textNode);
+                if (optional) {
+                  node.classList.add('symbol__invisible', 'digit--divider');
+                } else {
+                  node.classList.add('digit--divider');
+                }
+                this._core.domAPI.appendChild(node);
             } // EndSwitch
 
             // Build data object of all DIGITS FORMAT
@@ -232,10 +252,11 @@ Still under construction     | ...                                      | ...
                 // First item in the list is the last number (digit).
                 formatLst.unshift({
                   id: elementID,
-                  isDecimal: isDecimalMark,
+                  isDecimal: isDecimalMark, // Is LOCAL '.' or ','
                   isDigit: _format.substr(i, 1) === '#' ? true : false,
-                  isOptional: optional,
-                  isThousand: isThousandMark,
+                  isDivider: isDividerMark, // Can be anything, except '#'
+                  isOptional: optional, // Lies between '('  and ')'
+                  isThousand: isThousandMark, // SPACE or other LOCAL
                   node: node,
                 });
             }
@@ -268,9 +289,13 @@ Still under construction     | ...                                      | ...
 
           // buildDigitFormatList() also determine `thousandSeparator`
           // Determine maximum FLOAT number.
-          _format = _format.replace(/[()]/g, '');
+
+          // Keep only '#' and DECIMAL MARK ('.' or ',')
           _format = _format.replace(new RegExp('\\' + this._core.thousandSeparator, 'g'), '');
-          _format = _format.replace(new RegExp('\\' + this.localDecimal), '.');
+          _format = _format.replace(/[^.,#]/g, '');
+
+          _format = _format.replace(new RegExp('\\' + this.localDecimal), '.'); // Formating to JS Number
+
           this._core.formatAsZeroNumber = _format.replace(/#/g, '0'); // Example '00000.00'
           this._core.maxNumber = parseFloat(_format.replace(/#/g, '9'), 10);
           if (this._core.formatDecimalMarkPosition) {
@@ -304,9 +329,9 @@ Still under construction     | ...                                      | ...
         var bracketB = 0; // Only one occurence of ( and ).
         // Writing and testing https://regex101.com/
         var validation = [
-          {regx: /(?=^(#|\(#))(?=.*#$)/, msg: 'Always start with `#` OR `(#` and always end with an `#`.'},
-          {regx: /^[#.,()]+$/, msg: 'Allowed characters `.,#()`.'},
-          {regx: /^\(.+\)|^#/, msg: 'Missing end `)`.'},
+          {regx: /(?=^(#|\(#))(?=.*#$)/, msg: 'Always start with `#` OR `(#` and always end with an `#`'},
+          // {regx: /^[#.,()\s:]+$/, msg: 'Allowed characters `.,#()Space:`'},
+          {regx: /^\(.+\)|^#/, msg: 'Missing end `)`'},
         ];
 
         _format = _format ? _format : this.format;
@@ -468,14 +493,14 @@ Still under construction     | ...                                      | ...
 
       // Update digit display with input from `format` and `number`
       _paintNumber: function(_numberStr, _oldNumberStr) {
-        // this._set'PropertyAsReadOnly'() - property is '_number'.
-        // https://www.polymer-project.org/1.0/docs/devguide/properties#read-only
         if (this._core.symbols.length === 0 ) {
           this._paintFormat(this.format, null); // force paint
         }
 
         if (this.isValidLocalNumber(_numberStr)) {
           if (this.localDecimal === '.') {
+            // this._set'PropertyAsReadOnly'() - property is '_number'.
+            // https://www.polymer-project.org/1.0/docs/devguide/properties#read-only
             this._set_number(parseFloat(_numberStr, 10));
           } else { // Continental European
             this._set_number(parseFloat(_numberStr.replace(',', '.'), 10));

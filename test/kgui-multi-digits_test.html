@@ -98,6 +98,7 @@
           assert.equal(element._core.symbols[0].id, 'digit0'); // From RIGHT to LEFT
           assert.equal(element._core.symbols[0].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
           assert.equal(element._core.symbols[0].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[0].isDivider, false);
           assert.equal(element._core.symbols[0].isDigit, true);
           assert.equal(element._core.symbols[0].isOptional, false);
 
@@ -247,24 +248,28 @@
           assert.equal(element._core.symbols[0].id, 'digit0'); // From RIGHT to LEFT
           assert.equal(element._core.symbols[0].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
           assert.equal(element._core.symbols[0].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[0].isDivider, false);
           assert.equal(element._core.symbols[0].isDigit, true);
           assert.equal(element._core.symbols[0].isOptional, false);
 
           assert.equal(element._core.symbols[3].id, 'token9'); // From LEFT to RIGHT
           assert.equal(element._core.symbols[3].isDecimal, true); // Is symbol identified as LOCAL a DECIMAL MARK
           assert.equal(element._core.symbols[3].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[3].isDivider, true);
           assert.equal(element._core.symbols[3].isDigit, false);
           assert.equal(element._core.symbols[3].isOptional, false);
 
           assert.equal(element._core.symbols[7].id, 'token5'); // From LEFT to RIGHT
           assert.equal(element._core.symbols[7].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
           assert.equal(element._core.symbols[7].isThousand, true); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[7].isDivider, true);
           assert.equal(element._core.symbols[7].isDigit, false);
           assert.equal(element._core.symbols[7].isOptional, false);
 
           assert.equal(element._core.symbols[9].id, 'digit7'); // From RIGHT to LEFT
           assert.equal(element._core.symbols[9].isDecimal, false); // Is symbol identified as LOCAL a DECIMAL MARK
           assert.equal(element._core.symbols[9].isThousand, false); // Is symbol identified as LOCAL a THOUSANDS MARK
+          assert.equal(element._core.symbols[9].isDivider, false);
           assert.equal(element._core.symbols[9].isDigit, true);
           assert.equal(element._core.symbols[9].isOptional, true);
         });
@@ -274,19 +279,22 @@
           // But, will use the default format (##)#.
           assert.throws(function() {
             element.validateFormat('a');
-          }, 'Always start with `#` OR `(#` and always end with an `#`.');
+          }, 'Always start with `#` OR `(#` and always end with an `#`');
 
           assert.throws(function() {
             element.validateFormat('#(#)');
-          }, 'Always start with `#` OR `(#` and always end with an `#`.');
+          }, 'Always start with `#` OR `(#` and always end with an `#`');
 
+          /* All characters allowed except '(', ')'
+           * Because they are part of the format string characters.
           assert.throws(function() {
             element.validateFormat('(#a)#');
-          }, 'Allowed characters `.,#()`.');
+          }, 'Allowed characters `.,#()Space:`');
+          */
 
           assert.throws(function() {
             element.validateFormat('(#');
-          }, 'Missing end `)`.');
+          }, 'Missing end `)`');
 
           assert.throws(function() {
             element.validateFormat('(#))#');
@@ -826,6 +834,28 @@
           element.number = '4.9';
           assert.equal(element._getDigitFloatStr(), '004.90');
           assert.equal(element._number, 4.9);
+        });
+
+        // -----------------------------------------------------------------------------------
+        // Function _getDigitFloatStr(), get the multi digits number value as a string.
+        // -----------------------------------------------------------------------------------
+
+        test('G01 - SPACE Diver (thousands), is ISO standard', function() {
+          // Prepare
+          if (decimalSeparator === ',') { // Continental European
+            element.setAttribute('format', '### ### ###');
+          } else {
+            element.setAttribute('format', '### ### ###');
+          }
+
+          // Test
+          assert.equal(element._getDigitFloatStr(), '000000000');
+
+          // Prepare
+          element.setAttribute('number', '87654321');
+
+          // Test
+          assert.equal(element._getDigitFloatStr(), '087654321');
         });
 
         // -----------------------------------------------------------------------------------
