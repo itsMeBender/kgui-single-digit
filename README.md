@@ -20,8 +20,8 @@
 
 # Introduction
 
-Manipulate a single or multiple digits, with mouse or keyboard. 
-But mainly mouse, because keyboard usage, will overlay the keyboard on the app, hiding too much info.
+Manipulate a single or multiple digits, with mouse (touch). 
+Why? Because keyboard usage creates an overlay for the keyboard on the app, hiding too much info.
 This will be handy for small corrections of a number, like an INR value or dosing pills.
 
 ## Localization of decimal mark
