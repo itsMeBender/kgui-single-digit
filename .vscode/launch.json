@@ -11,8 +11,8 @@
         {
             "type": "chrome",
             "request": "kanweg_test",
-            "name": "Test demo",
-            "url": "http://localhost:8081/components/kgui-single-digit/test/kanweg_test.html",
+            "name": "tempfile",
+            "url": "http://localhost:8081/components/kgui-single-digit/test/temp_test.html",
             "webRoot": "${workspaceRoot}"
         },
         {
