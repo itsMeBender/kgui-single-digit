@@ -82,7 +82,15 @@
         // Functionality CLICK the ADD and SUBTRACT buttons.
         // -----------------------------------------------------------------------------------
 
-        test('B11 - Counting upwards', function() {
+        test('B11 - Counting upwards to MAX', function(done) {
+          var eventBoundaryCounter = 0;
+          // Prepare
+          element.addEventListener('digit-maximum-reached', function(e) {
+            eventBoundaryCounter += 1;
+            if (e.detail.max === '7') {
+              done();
+            }
+          });
           assert.equal(buttons.length, 2);
 
           assert.equal(buttons[UP].disabled, false);
@@ -90,18 +98,26 @@
           eventFire(buttons[UP], 'click');
           assert.equal(element.digit, 6);
 
-          eventFire(buttons[UP], 'click');
+          eventFire(buttons[UP], 'click'); // FIRE 'digit-maximum-reached'
           assert.equal(element.digit, 7);
-
           assert.equal(buttons[UP].disabled, true);
 
           eventFire(buttons[UP], 'click');
           assert.equal(element.digit, 7);
-
           assert.equal(buttons[UP].disabled, true);
+
+          assert.equal(eventBoundaryCounter, 1); // Event 'digit-maximum-reached' only fired once
         });
 
-        test('B12 - Counting downwards', function() {
+        test('B12 - Counting downwards to MIN', function(done) {
+          var eventBoundaryCounter = 0;
+          // Prepare
+          element.addEventListener('digit-minimum-reached', function(e) {
+            eventBoundaryCounter += 1;
+            if (e.detail.min === '3') {
+              done();
+            }
+          });
           assert.equal(buttons.length, 2);
 
           assert.equal(buttons[DOWN].disabled, false);
@@ -111,13 +127,13 @@
 
           eventFire(buttons[DOWN], 'click');
           assert.equal(element.digit, 3);
-
           assert.equal(buttons[DOWN].disabled, true);
 
           eventFire(buttons[DOWN], 'click');
           assert.equal(element.digit, 3);
-
           assert.equal(buttons[DOWN].disabled, true);
+
+          assert.equal(eventBoundaryCounter, 1); // Event 'digit-minimum-reached' only fired once
         });
 
         // -----------------------------------------------------------------------------------
